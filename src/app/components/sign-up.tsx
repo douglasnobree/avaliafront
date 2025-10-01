@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import Image from "next/image";
 import { Loader2, X } from "lucide-react";
-import { signUp } from "@/lib/auth-client";
+import { signUp, signIn } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -63,9 +63,15 @@ export default function SignUp() {
 
 	const handleGoogleSignUp = async () => {
 		setLoading(true);
-		// Add Google sign up logic here
-		await new Promise((resolve) => setTimeout(resolve, 1500));
-		setLoading(false);
+		try {
+			await signIn.social({
+				provider: "google",
+				callbackURL: "http://localhost:3000/dashboard",
+			});
+		} catch (error) {
+			toast.error("Erro ao fazer login com Google");
+			setLoading(false);
+		}
 	};
 
 	return (
