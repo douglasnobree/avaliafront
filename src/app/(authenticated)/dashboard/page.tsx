@@ -1,6 +1,6 @@
 'use client';
 
-import { useSession } from '@/lib/auth-client';
+import { authClient, useSession } from '@/lib/auth-client';
 import {
   Card,
   CardContent,
@@ -8,41 +8,57 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { User } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { User, Plus } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import api from '@/lib/api';
 
 export default function DashboardPage() {
-
-  api.get('/protected/user')
+  api.get('/protected/user');
   const { data: session } = useSession();
+  const { data: organization } = authClient.useActiveOrganization();
 
   return (
     <div className='max-w-4xl mx-auto space-y-6'>
       {/* Welcome Card */}
       <Card>
         <CardHeader>
-          <div className='flex items-center gap-4'>
-            {session?.user?.image ? (
-              <div className='relative w-16 h-16 rounded-full overflow-hidden'>
-                <Image
-                  src={session.user.image}
-                  alt={session.user.name || 'User'}
-                  fill
-                  className='object-cover'
-                />
+          <div className='flex items-center justify-between'>
+            <div className='flex items-center gap-4'>
+              {session?.user?.image ? (
+                <div className='relative w-16 h-16 rounded-full overflow-hidden'>
+                  <Image
+                    src={session.user.image}
+                    alt={session.user.name || 'User'}
+                    fill
+                    className='object-cover'
+                  />
+                </div>
+              ) : (
+                <div className='w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center'>
+                  <User className='w-8 h-8 text-primary' />
+                </div>
+              )}
+              <div>
+                <CardTitle className='text-2xl'>
+                  Bem-vindo, {session?.user?.name}!
+                </CardTitle>
+                <CardDescription>{session?.user?.email}</CardDescription>
+                {organization && (
+                  <p className='text-sm text-muted-foreground mt-1'>
+                    Organização:{' '}
+                    <span className='font-medium'>{organization.name}</span>
+                  </p>
+                )}
               </div>
-            ) : (
-              <div className='w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center'>
-                <User className='w-8 h-8 text-primary' />
-              </div>
-            )}
-            <div>
-              <CardTitle className='text-2xl'>
-                Bem-vindo, {session?.user?.name}!
-              </CardTitle>
-              <CardDescription>{session?.user?.email}</CardDescription>
             </div>
+            <Link href='/criar-propriedade'>
+              <Button>
+                <Plus className='w-4 h-4 mr-2' />
+                Nova Propriedade
+              </Button>
+            </Link>
           </div>
         </CardHeader>
         <CardContent>

@@ -76,7 +76,7 @@ export default function SignUp() {
         password: data.password,
         name: `${data.firstName} ${data.lastName}`,
         image: imageBase64,
-        callbackURL: '/dashboard',
+        callbackURL: '/criar-organizacao',
         fetchOptions: {
           onResponse: () => {
             setLoading(false);
@@ -88,7 +88,7 @@ export default function SignUp() {
             toast.error(ctx.error.message);
           },
           onSuccess: async () => {
-            router.push('/dashboard');
+            router.push('/criar-organizacao');
           },
         },
       });
@@ -103,7 +103,7 @@ export default function SignUp() {
     try {
       await signIn.social({
         provider: 'google',
-        callbackURL: 'http://localhost:3000/dashboard',
+        callbackURL: 'http://localhost:3000/criar-organizacao',
       });
     } catch (error) {
       toast.error('Erro ao fazer login com Google');
