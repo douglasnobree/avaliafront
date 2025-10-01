@@ -10,8 +10,11 @@ import {
 } from '@/components/ui/card';
 import { User } from 'lucide-react';
 import Image from 'next/image';
+import api from '@/lib/api';
 
 export default function DashboardPage() {
+
+  api.get('/protected/user')
   const { data: session } = useSession();
 
   return (
