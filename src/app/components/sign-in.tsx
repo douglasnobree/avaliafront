@@ -9,18 +9,21 @@ import { Loader2 } from "lucide-react";
 import { signIn } from "../../lib/auth-client";
 import Link from "next/link";
 import { Logo } from "@/components/logo";
+import { useRouter } from "next/navigation";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     await signIn.email(
       {
         email,
-        password
+        password,
+        callbackURL: "/dashboard"
       },
       {
         onRequest: (ctx) => {
@@ -28,6 +31,9 @@ export default function SignIn() {
         },
         onResponse: (ctx) => {
           setLoading(false);
+        },
+        onSuccess: () => {
+          router.push("/dashboard");
         },
       },
     );
