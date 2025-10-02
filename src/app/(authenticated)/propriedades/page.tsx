@@ -96,7 +96,7 @@ export default function PropertiesPage() {
               key={property.id}
               className='cursor-pointer hover:shadow-md transition-shadow'
               onClick={() =>
-                router.push(`/propriedades/${property.id}/setores`)
+                router.push(`/propriedades/${property.id}`)
               }>
               <CardHeader>
                 <CardTitle className='text-xl'>{property.nome}</CardTitle>
