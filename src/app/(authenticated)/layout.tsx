@@ -54,7 +54,7 @@ export default function AuthenticatedLayout({
 
           // 2. Verifica se tem propriedades
           try {
-            const propertiesResponse = await api.get('/properties');
+            const propertiesResponse = await api.get('/property/my-properties');
             const properties = propertiesResponse.data;
 
             // Se não tem nenhuma propriedade, redireciona para criar
