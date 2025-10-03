@@ -36,7 +36,7 @@ export default function PropertiesPage() {
 
   const loadProperties = async () => {
     try {
-      const response = await api.get('/property');
+      const response = await api.get('property/my-properties');
       setProperties(response.data);
     } catch (error: any) {
       console.error('Erro ao carregar propriedades:', error);
@@ -95,7 +95,9 @@ export default function PropertiesPage() {
             <Card
               key={property.id}
               className='cursor-pointer hover:shadow-md transition-shadow'
-              onClick={() => router.push(`/propriedades/${property.id}`)}>
+              onClick={() =>
+                router.push(`/propriedades/${property.id}`)
+              }>
               <CardHeader>
                 <CardTitle className='text-xl'>{property.nome}</CardTitle>
                 <CardDescription>
