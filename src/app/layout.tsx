@@ -15,19 +15,21 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'IrrigaAi | Plataforma de Irrigação Inteligente',
+  title: 'Avalia Irriga | Avaliação de Sistemas de Irrigação',
   description:
-    'Plataforma inovadora que utiliza inteligência artificial para otimizar sistemas de irrigação agrícola, maximizando produtividade e eficiência hídrica.',
+    'Plataforma profissional para avaliação e análise de uniformidade de sistemas de irrigação, com cálculos de CUD e CUC em tempo real.',
   keywords: [
     'irrigação',
     'agricultura',
-    'inteligência artificial',
-    'IrrigaAi',
-    'plataforma agrícola',
-    'otimização hídrica',
+    'avaliação de irrigação',
+    'Avalia Irriga',
+    'CUD',
+    'CUC',
+    'uniformidade de irrigação',
+    'sistema de irrigação',
   ],
-  authors: [{ name: 'IrrigaAi Team' }],
-  creator: 'IrrigaAi',
+  authors: [{ name: 'Avalia Irriga Team' }],
+  creator: 'Avalia Irriga',
   publisher: 'IrrigaAi',
   formatDetection: {
     email: false,

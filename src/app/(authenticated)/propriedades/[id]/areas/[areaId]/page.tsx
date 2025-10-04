@@ -10,8 +10,11 @@ import {
   BarChart3,
   FileText,
   TrendingUp,
+  Trash2,
+  Pencil,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { DeleteConfirmationDialog } from '@/components/ui/delete-confirmation-dialog';
 import {
   Card,
   CardContent,
@@ -45,6 +48,8 @@ export default function AreaDetailPage() {
   const [area, setArea] = useState<Area | null>(null);
   const [avaliacoes, setAvaliacoes] = useState<Avaliacao[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const propertyId = params?.id as string;
   const areaId = params?.areaId as string;
 
@@ -55,21 +60,12 @@ export default function AreaDetailPage() {
   const loadAreaAndAvaliacoes = async () => {
     try {
       // Carrega dados da área
-      // const areaResponse = await api.get(`/areas/${areaId}`);
-      // setArea(areaResponse.data);
+      const areaResponse = await api.get(`/areas/${areaId}`);
+      setArea(areaResponse.data);
 
       // Carrega avaliações da área
-      // const avaliacoesResponse = await api.get(`/areas/${areaId}/avaliacoes`);
-      // setAvaliacoes(avaliacoesResponse.data);
-
-      // Mock temporário
-      setArea({
-        id: areaId,
-        indentificacao: 'Área 1',
-        area_ha: 15.5,
-        propriedade_id: propertyId,
-      });
-      setAvaliacoes([]);
+      const avaliacoesResponse = await api.get(`/avaliacoes/area/${areaId}`);
+      setAvaliacoes(avaliacoesResponse.data);
     } catch (error: any) {
       console.error('Erro ao carregar dados:', error);
       toast.error('Erro ao carregar dados da área');
@@ -116,6 +112,21 @@ export default function AreaDetailPage() {
     );
   }
 
+  const handleDeleteArea = async () => {
+    try {
+      setDeleting(true);
+      await api.delete(`/areas/${areaId}`);
+      toast.success('Área excluída com sucesso!');
+      router.push(`/propriedades/${propertyId}`);
+    } catch (error: any) {
+      console.error('Erro ao excluir área:', error);
+      toast.error(
+        error?.response?.data?.message || 'Erro ao excluir área'
+      );
+      setDeleting(false);
+    }
+  };
+
   return (
     <div className='max-w-6xl mx-auto space-y-6'>
       {/* Header */}
@@ -126,7 +137,21 @@ export default function AreaDetailPage() {
             Área: {area.area_ha} hectares
           </p>
         </div>
-        <div className='flex gap-3'>
+        <div className='flex gap-2'>
+          <Button
+            variant='outline'
+            onClick={() => router.push(`/propriedades/${propertyId}/areas/${areaId}/editar`)}
+          >
+            <Pencil className='w-4 h-4 mr-2' />
+            Editar
+          </Button>
+          <Button
+            variant='destructive'
+            onClick={() => setDeleteDialogOpen(true)}
+          >
+            <Trash2 className='w-4 h-4 mr-2' />
+            Excluir
+          </Button>
           <Button
             variant='outline'
             onClick={() => router.push(`/propriedades/${propertyId}`)}>
@@ -141,6 +166,15 @@ export default function AreaDetailPage() {
           </Link>
         </div>
       </div>
+
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteArea}
+        title="Excluir Área"
+        description="Tem certeza que deseja excluir esta área? Esta ação é irreversível e todos os dados de avaliações associados serão perdidos permanentemente."
+        itemName={area.indentificacao}
+      />
 
       {/* Última Avaliação (se existir) */}
       {avaliacoes.length > 0 && (

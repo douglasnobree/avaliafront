@@ -53,40 +53,13 @@ export default function RelatoriosPage() {
 
   const loadData = async () => {
     try {
-      // Mock temporário
-      setArea({
-        id: areaId,
-        indentificacao: 'Área 1',
-        area_ha: 15.5,
-      });
+      // Carrega dados da área
+      const areaResponse = await api.get(`/areas/${areaId}`);
+      setArea(areaResponse.data);
 
-      // Mock de avaliações para o gráfico
-      setAvaliacoes([
-        {
-          id: '1',
-          data: '2025-07-15',
-          cud: 88.5,
-          cuc: 91.2,
-        },
-        {
-          id: '2',
-          data: '2025-08-20',
-          cud: 85.3,
-          cuc: 89.7,
-        },
-        {
-          id: '3',
-          data: '2025-09-10',
-          cud: 92.1,
-          cuc: 93.5,
-        },
-        {
-          id: '4',
-          data: '2025-10-02',
-          cud: 90.8,
-          cuc: 92.3,
-        },
-      ]);
+      // Carrega avaliações da área
+      const avaliacoesResponse = await api.get(`/avaliacoes/area/${areaId}`);
+      setAvaliacoes(avaliacoesResponse.data);
     } catch (error: any) {
       console.error('Erro ao carregar dados:', error);
       toast.error('Erro ao carregar relatórios');

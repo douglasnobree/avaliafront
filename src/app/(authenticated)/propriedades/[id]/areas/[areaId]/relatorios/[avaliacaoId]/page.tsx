@@ -3,8 +3,10 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { toast } from 'sonner';
-import { Loader2, ArrowLeft, TrendingUp, TrendingDown } from 'lucide-react';
+import { Loader2, ArrowLeft, TrendingUp, TrendingDown, BarChart3, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { DeleteConfirmationDialog } from '@/components/ui/delete-confirmation-dialog';
+import { MeasurementGrid } from '@/components/ui/measurement-grid';
 import {
   Card,
   CardContent,
@@ -41,6 +43,8 @@ export default function RelatorioDetalhadoPage() {
   const router = useRouter();
   const [avaliacao, setAvaliacao] = useState<AvaliacaoDetalhada | null>(null);
   const [loading, setLoading] = useState(true);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const propertyId = params?.id as string;
   const areaId = params?.areaId as string;
   const avaliacaoId = params?.avaliacaoId as string;
@@ -51,22 +55,41 @@ export default function RelatorioDetalhadoPage() {
 
   const loadAvaliacaoDetalhada = async () => {
     try {
-      // Mock temporário com dados de exemplo
-      const mockPontos = Array.from({ length: 25 }, (_, i) => ({
-        vazao_l_h: 45 + Math.random() * 20,
-        eixo_x: (i % 5) * 2,
-        eixo_y: Math.floor(i / 5) * 2,
-      }));
+      const response = await api.get(`/avaliacoes/${avaliacaoId}`);
+      const data = response.data;
+
+      console.log('Dados da API:', data);
+      console.log('Ponto_localizada:', data.Ponto_localizada);
+      console.log('Ponto_pivo:', data.Ponto_pivo);
+
+      // Mapear pontos do backend (pode ser Ponto_localizada ou Ponto_pivo)
+      let pontos: any[] = [];
+      
+      if (data.Ponto_localizada && data.Ponto_localizada.length > 0) {
+        pontos = data.Ponto_localizada.map((p: any) => ({
+          vazao_l_h: p.vazao_l_h,
+          eixo_x: p.eixo_x,
+          eixo_y: p.eixo_y,
+        }));
+      } else if (data.Ponto_pivo && data.Ponto_pivo.length > 0) {
+        pontos = data.Ponto_pivo.map((p: any) => ({
+          vazao_l_h: p.vazao_l_h,
+          eixo_x: p.sequencia,
+          eixo_y: 0,
+        }));
+      }
+
+      console.log('Pontos mapeados:', pontos);
 
       setAvaliacao({
-        id: avaliacaoId,
-        data: '2025-10-02',
-        area_irrigada: 15.5,
-        volume_agua: 12500,
-        tempo_irrigacao: 180,
-        cud: 90.8,
-        cuc: 92.3,
-        pontos: mockPontos,
+        id: data.id,
+        data: data.data,
+        area_irrigada: data.area_irrigada,
+        volume_agua: data.volume_agua,
+        tempo_irrigacao: data.tempo_irrigacao,
+        cud: data.cud,
+        cuc: data.cuc,
+        pontos,
       });
     } catch (error: any) {
       console.error('Erro ao carregar avaliação:', error);
@@ -124,14 +147,36 @@ export default function RelatorioDetalhadoPage() {
   }
 
   // Calcular estatísticas de vazão
-  const vazoes = avaliacao.pontos.map((p) => p.vazao_l_h);
-  const vazaoMedia = vazoes.reduce((a, b) => a + b, 0) / vazoes.length;
-  const vazaoMaxima = Math.max(...vazoes);
-  const vazaoMinima = Math.min(...vazoes);
-  const vazaoPadrao = Math.sqrt(
-    vazoes.reduce((sum, v) => sum + Math.pow(v - vazaoMedia, 2), 0) /
-      vazoes.length
-  );
+  const vazoes = avaliacao.pontos?.map((p) => p.vazao_l_h) || [];
+  const vazaoMedia = vazoes.length > 0 
+    ? vazoes.reduce((a, b) => a + b, 0) / vazoes.length 
+    : 0;
+  const vazaoMaxima = vazoes.length > 0 ? Math.max(...vazoes) : 0;
+  const vazaoMinima = vazoes.length > 0 ? Math.min(...vazoes) : 0;
+  const vazaoPadrao = vazoes.length > 0
+    ? Math.sqrt(
+        vazoes.reduce((sum, v) => sum + Math.pow(v - vazaoMedia, 2), 0) /
+          vazoes.length
+      )
+    : 0;
+  const coeficienteVariacao = vazaoMedia > 0 
+    ? (vazaoPadrao / vazaoMedia) * 100 
+    : 0;
+
+  const handleDeleteAvaliacao = async () => {
+    try {
+      setDeleting(true);
+      await api.delete(`/avaliacoes/${avaliacaoId}`);
+      toast.success('Avaliação excluída com sucesso!');
+      router.push(`/propriedades/${propertyId}/areas/${areaId}`);
+    } catch (error: any) {
+      console.error('Erro ao excluir avaliação:', error);
+      toast.error(
+        error?.response?.data?.message || 'Erro ao excluir avaliação'
+      );
+      setDeleting(false);
+    }
+  };
 
   return (
     <div className='max-w-6xl mx-auto space-y-6'>
@@ -148,45 +193,51 @@ export default function RelatorioDetalhadoPage() {
             })}
           </p>
         </div>
-        <Button
-          variant='outline'
-          onClick={() =>
-            router.push(
-              `/propriedades/${propertyId}/areas/${areaId}/relatorios`
-            )
-          }>
-          <ArrowLeft className='w-4 h-4 mr-2' />
-          Voltar
-        </Button>
+        <div className='flex gap-2'>
+          <Button
+            variant='destructive'
+            onClick={() => setDeleteDialogOpen(true)}
+          >
+            <Trash2 className='w-4 h-4 mr-2' />
+            Excluir
+          </Button>
+          <Button
+            variant='outline'
+            onClick={() =>
+              router.push(
+                `/propriedades/${propertyId}/areas/${areaId}/relatorios`
+              )
+            }>
+            <ArrowLeft className='w-4 h-4 mr-2' />
+            Voltar
+          </Button>
+        </div>
       </div>
 
-      {/* Informações Gerais */}
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteAvaliacao}
+        title="Excluir Avaliação"
+        description="Tem certeza que deseja excluir esta avaliação? Esta ação é irreversível e todos os dados e medições serão perdidos permanentemente."
+        itemName={`Avaliação de ${new Date(avaliacao.data).toLocaleDateString('pt-BR')}`}
+      />
+
+      {/* Informações Gerais - REMOVIDOS: área irrigada, volume, tempo */}
+      <div className='grid grid-cols-1 md:grid-cols-1 gap-4'>
         <Card>
           <CardHeader>
-            <CardTitle className='text-sm'>Área Irrigada</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className='text-2xl font-bold'>{avaliacao.area_irrigada} ha</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className='text-sm'>Volume de Água</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className='text-2xl font-bold'>
-              {avaliacao.volume_agua.toLocaleString('pt-BR')} L
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className='text-sm'>Tempo de Irrigação</CardTitle>
+            <CardTitle className='text-sm'>Data da Avaliação</CardTitle>
           </CardHeader>
           <CardContent>
             <p className='text-2xl font-bold'>
-              {avaliacao.tempo_irrigacao} min
+              {new Date(avaliacao.data).toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
             </p>
           </CardContent>
         </Card>
@@ -287,18 +338,41 @@ export default function RelatorioDetalhadoPage() {
         </Card>
       </div>
 
+      {/* Grid Visual dos Pontos Medidos */}
+      <MeasurementGrid
+        numLinhas={4}
+        numEmissores={4}
+        onGridChange={() => {}}
+        initialGrid={
+          avaliacao.pontos?.map((ponto: any, index: number) => ({
+            linha: Math.floor(index / 4) + 1,
+            emissor: (index % 4) + 1,
+            medido: true,
+          })) || []
+        }
+      />
+
       {/* Gráfico 3D de Vazão */}
       <Card>
         <CardHeader>
           <CardTitle>Visualização 3D da Vazão</CardTitle>
           <CardDescription>
-            Distribuição espacial da vazão na área irrigada (interativo)
+            Distribuição espacial da vazão na área irrigada (interativo - clique e arraste para rotacionar)
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className='h-[500px] w-full bg-secondary/20 rounded-lg'>
-            <FlowVisualization3D data={avaliacao.pontos} />
-          </div>
+          {avaliacao.pontos && avaliacao.pontos.length > 0 ? (
+            <div className='h-[500px] w-full bg-secondary/20 rounded-lg overflow-hidden'>
+              <FlowVisualization3D data={avaliacao.pontos} />
+            </div>
+          ) : (
+            <div className='h-[500px] w-full bg-secondary/20 rounded-lg flex items-center justify-center'>
+              <div className='text-center text-muted-foreground'>
+                <p className='text-lg font-semibold mb-2'>Sem dados para visualizar</p>
+                <p className='text-sm'>Nenhum ponto de medição foi registrado nesta avaliação</p>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -307,75 +381,127 @@ export default function RelatorioDetalhadoPage() {
         <CardHeader>
           <CardTitle>Análises de Vazão</CardTitle>
           <CardDescription>
-            Estatísticas detalhadas da vazão coletada
+            Estatísticas detalhadas dos {avaliacao.pontos?.length || 0} pontos de medição
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
-            <div className='p-4 bg-blue-50 rounded-lg border border-blue-200'>
-              <p className='text-sm text-blue-600 font-medium mb-1'>
-                Vazão Média
-              </p>
-              <p className='text-2xl font-bold text-blue-700'>
-                {vazaoMedia.toFixed(2)}
-              </p>
-              <p className='text-xs text-blue-600 mt-1'>L/h</p>
+          {vazoes.length === 0 ? (
+            <div className='flex flex-col items-center justify-center py-12 text-muted-foreground'>
+              <p>Nenhum ponto de medição encontrado</p>
             </div>
+          ) : (
+            <>
+              <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
+                <div className='p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800'>
+                  <p className='text-sm text-blue-600 dark:text-blue-400 font-medium mb-1'>
+                    Vazão Média
+                  </p>
+                  <p className='text-2xl font-bold text-blue-700 dark:text-blue-300'>
+                    {vazaoMedia.toFixed(2)}
+                  </p>
+                  <p className='text-xs text-blue-600 dark:text-blue-400 mt-1'>L/h</p>
+                </div>
 
-            <div className='p-4 bg-green-50 rounded-lg border border-green-200'>
-              <div className='flex items-center gap-2'>
-                <TrendingUp className='w-4 h-4 text-green-600' />
-                <p className='text-sm text-green-600 font-medium'>
-                  Vazão Máxima
-                </p>
+                <div className='p-4 bg-green-50 dark:bg-green-950 rounded-lg border border-green-200 dark:border-green-800'>
+                  <div className='flex items-center gap-2 mb-1'>
+                    <TrendingUp className='w-4 h-4 text-green-600 dark:text-green-400' />
+                    <p className='text-sm text-green-600 dark:text-green-400 font-medium'>
+                      Vazão Máxima
+                    </p>
+                  </div>
+                  <p className='text-2xl font-bold text-green-700 dark:text-green-300'>
+                    {vazaoMaxima.toFixed(2)}
+                  </p>
+                  <p className='text-xs text-green-600 dark:text-green-400 mt-1'>
+                    +{((vazaoMaxima - vazaoMedia) / vazaoMedia * 100).toFixed(1)}% da média
+                  </p>
+                </div>
+
+                <div className='p-4 bg-red-50 dark:bg-red-950 rounded-lg border border-red-200 dark:border-red-800'>
+                  <div className='flex items-center gap-2 mb-1'>
+                    <TrendingDown className='w-4 h-4 text-red-600 dark:text-red-400' />
+                    <p className='text-sm text-red-600 dark:text-red-400 font-medium'>
+                      Vazão Mínima
+                    </p>
+                  </div>
+                  <p className='text-2xl font-bold text-red-700 dark:text-red-300'>
+                    {vazaoMinima.toFixed(2)}
+                  </p>
+                  <p className='text-xs text-red-600 dark:text-red-400 mt-1'>
+                    -{((vazaoMedia - vazaoMinima) / vazaoMedia * 100).toFixed(1)}% da média
+                  </p>
+                </div>
+
+                <div className='p-4 bg-purple-50 dark:bg-purple-950 rounded-lg border border-purple-200 dark:border-purple-800'>
+                  <p className='text-sm text-purple-600 dark:text-purple-400 font-medium mb-1'>
+                    Desvio Padrão
+                  </p>
+                  <p className='text-2xl font-bold text-purple-700 dark:text-purple-300'>
+                    {vazaoPadrao.toFixed(2)}
+                  </p>
+                  <p className='text-xs text-purple-600 dark:text-purple-400 mt-1'>
+                    CV: {coeficienteVariacao.toFixed(1)}%
+                  </p>
+                </div>
               </div>
-              <p className='text-2xl font-bold text-green-700 mt-1'>
-                {vazaoMaxima.toFixed(2)}
-              </p>
-              <p className='text-xs text-green-600 mt-1'>L/h</p>
-            </div>
 
-            <div className='p-4 bg-red-50 rounded-lg border border-red-200'>
-              <div className='flex items-center gap-2'>
-                <TrendingDown className='w-4 h-4 text-red-600' />
-                <p className='text-sm text-red-600 font-medium'>
-                  Vazão Mínima
-                </p>
+              <div className='mt-6 grid grid-cols-1 md:grid-cols-2 gap-4'>
+                <div className='p-4 bg-muted rounded-lg'>
+                  <h4 className='font-semibold mb-3 flex items-center gap-2'>
+                    <BarChart3 className='w-4 h-4' />
+                    Estatísticas Gerais
+                  </h4>
+                  <ul className='space-y-2 text-sm'>
+                    <li className='flex justify-between'>
+                      <span className='text-muted-foreground'>Total de pontos:</span>
+                      <span className='font-semibold'>{vazoes.length}</span>
+                    </li>
+                    <li className='flex justify-between'>
+                      <span className='text-muted-foreground'>Amplitude:</span>
+                      <span className='font-semibold'>{(vazaoMaxima - vazaoMinima).toFixed(2)} L/h</span>
+                    </li>
+                    <li className='flex justify-between'>
+                      <span className='text-muted-foreground'>Coef. Variação:</span>
+                      <span className={`font-semibold ${
+                        coeficienteVariacao < 10 ? 'text-green-600' :
+                        coeficienteVariacao < 20 ? 'text-yellow-600' :
+                        'text-red-600'
+                      }`}>
+                        {coeficienteVariacao.toFixed(1)}%
+                        {coeficienteVariacao < 10 ? ' (Excelente)' :
+                         coeficienteVariacao < 20 ? ' (Bom)' :
+                         ' (Precisa Ajuste)'}
+                      </span>
+                    </li>
+                    <li className='flex justify-between'>
+                      <span className='text-muted-foreground'>Vazão Total:</span>
+                      <span className='font-semibold'>
+                        {(vazaoMedia * vazoes.length).toFixed(0)} L/h
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className='p-4 bg-muted rounded-lg'>
+                  <h4 className='font-semibold mb-3'>📊 Interpretação</h4>
+                  <ul className='space-y-2 text-sm text-muted-foreground'>
+                    <li>
+                      • <strong>Vazão Média:</strong> Representa a vazão típica do sistema
+                    </li>
+                    <li>
+                      • <strong>Desvio Padrão:</strong> Quanto menor, mais uniforme é a distribuição
+                    </li>
+                    <li>
+                      • <strong>CV (Coef. Variação):</strong> Ideal &lt; 10%, Bom &lt; 20%
+                    </li>
+                    <li>
+                      • <strong>Amplitude:</strong> Diferença entre maior e menor vazão
+                    </li>
+                  </ul>
+                </div>
               </div>
-              <p className='text-2xl font-bold text-red-700 mt-1'>
-                {vazaoMinima.toFixed(2)}
-              </p>
-              <p className='text-xs text-red-600 mt-1'>L/h</p>
-            </div>
-
-            <div className='p-4 bg-purple-50 rounded-lg border border-purple-200'>
-              <p className='text-sm text-purple-600 font-medium mb-1'>
-                Desvio Padrão
-              </p>
-              <p className='text-2xl font-bold text-purple-700'>
-                {vazaoPadrao.toFixed(2)}
-              </p>
-              <p className='text-xs text-purple-600 mt-1'>L/h</p>
-            </div>
-          </div>
-
-          <div className='mt-6 p-4 bg-muted rounded-lg'>
-            <h4 className='font-semibold mb-2'>Interpretação</h4>
-            <ul className='space-y-1 text-sm text-muted-foreground'>
-              <li>
-                • <strong>Vazão Média:</strong> Representa a vazão típica do
-                sistema
-              </li>
-              <li>
-                • <strong>Desvio Padrão:</strong> Quanto menor, mais uniforme é
-                a distribuição
-              </li>
-              <li>
-                • <strong>Variação (Max-Min):</strong>{' '}
-                {(vazaoMaxima - vazaoMinima).toFixed(2)} L/h
-              </li>
-            </ul>
-          </div>
+            </>
+          )}
         </CardContent>
       </Card>
     </div>

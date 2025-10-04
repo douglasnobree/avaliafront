@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { toast } from 'sonner';
-import { MapPin, Loader2, Plus, Calendar, BarChart3 } from 'lucide-react';
+import { MapPin, Loader2, Plus, Calendar, BarChart3, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { DeleteConfirmationDialog } from '@/components/ui/delete-confirmation-dialog';
 import {
   Card,
   CardContent,
@@ -54,6 +55,8 @@ export default function PropertyDetailPage() {
   const [property, setProperty] = useState<Property | null>(null);
   const [areas, setAreas] = useState<Area[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const propertyId = params?.id as string;
 
   useEffect(() => {
@@ -74,6 +77,21 @@ export default function PropertyDetailPage() {
       toast.error('Erro ao carregar dados da propriedade');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      setDeleting(true);
+      await api.delete(`/property/${propertyId}`);
+      toast.success('Propriedade excluída com sucesso!');
+      router.push('/propriedades');
+    } catch (error: any) {
+      console.error('Erro ao excluir propriedade:', error);
+      toast.error(
+        error?.response?.data?.message || 'Erro ao excluir propriedade'
+      );
+      setDeleting(false);
     }
   };
 
@@ -115,8 +133,33 @@ export default function PropertyDetailPage() {
             </span>
           </div>
         </div>
-        <Button onClick={() => router.push('/propriedades')}>Voltar</Button>
+        <div className='flex gap-2'>
+          <Button
+            variant='outline'
+            onClick={() => router.push(`/propriedades/${propertyId}/editar`)}
+          >
+            <Pencil className='w-4 h-4 mr-2' />
+            Editar
+          </Button>
+          <Button
+            variant='destructive'
+            onClick={() => setDeleteDialogOpen(true)}
+          >
+            <Trash2 className='w-4 h-4 mr-2' />
+            Excluir
+          </Button>
+          <Button onClick={() => router.push('/propriedades')}>Voltar</Button>
+        </div>
       </div>
+
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDelete}
+        title="Excluir Propriedade"
+        description="Tem certeza que deseja excluir esta propriedade? Esta ação é irreversível e todos os dados associados serão perdidos permanentemente."
+        itemName={property.nome}
+      />
 
       {/* Cards com informações da propriedade */}
       <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>

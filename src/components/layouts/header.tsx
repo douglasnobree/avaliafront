@@ -25,10 +25,10 @@ export function Header() {
       <div className='container mx-auto px-4 py-4'>
         <div className='flex items-center justify-between'>
           <div className='flex items-center gap-8'>
-            <Link href='/dashboard' className='flex items-center gap-3'>
-              <Logo />
-              <h1 className='text-xl md:text-2xl font-bold text-foreground'>
-                Avalialrriga
+            <Link href='/dashboard' className='flex items-center gap-3 hover:opacity-80 transition-opacity'>
+              <Logo width={50} height={50} />
+              <h1 className='text-xl md:text-2xl font-bold text-green-600'>
+                Avalia Irriga
               </h1>
             </Link>
 

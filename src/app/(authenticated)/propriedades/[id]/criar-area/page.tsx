@@ -33,21 +33,18 @@ const setorHidraulicoSchema = z.object({
   indentificacao: z.string().min(3, 'A identificação deve ter pelo menos 3 caracteres'),
   area_ha: z.string().min(1, 'A área é obrigatória'),
   // Dados técnicos do setor
-  fabricante: z.string().min(1, 'Fabricante é obrigatório'),
-  modelo: z.string().min(1, 'Modelo é obrigatório'),
+  fabricante: z.string().optional(),
+  modelo: z.string().optional(),
   emissor_type: z.enum(['MICROMICROASPERSOR', 'GOTEJAMENTO']),
   vazao_nominal: z.string().min(1, 'Vazão nominal é obrigatória'),
   pressao_trabalho: z.string().min(1, 'Pressão de trabalho é obrigatória'),
-  pressao_recomendada: z.string().min(1, 'Pressão recomendada é obrigatória'),
   dist_emissores: z.string().min(1, 'Distância entre emissores é obrigatória'),
   dist_laterais: z.string().min(1, 'Distância entre laterais é obrigatória'),
   filtro_tipo: z.string().min(1, 'Tipo de filtro é obrigatório'),
   malha_filtro: z.string().min(1, 'Malha do filtro é obrigatória'),
-  pressao_entrada: z.string().min(1, 'Pressão de entrada é obrigatória'),
   valvula_tipo: z.string().min(1, 'Tipo de válvula é obrigatório'),
   energia_tipo: z.string().min(1, 'Tipo de energia é obrigatório'),
-  condicoes_gerais: z.string().min(1, 'Condições gerais são obrigatórias'),
-  num_emissores: z.string().min(1, 'Número de emissores é obrigatório'),
+  condicoes_gerais: z.string().optional(),
   freq_manutencao: z.string().min(1, 'Frequência de manutenção é obrigatória'),
   data_ultima_manutencao: z.string().min(1, 'Data da última manutenção é obrigatória'),
 });
@@ -60,8 +57,8 @@ const pivoCentralSchema = z.object({
   // Dados técnicos do pivô
   num_torres: z.string().min(1, 'Número de torres é obrigatório'),
   comprimento: z.string().min(1, 'Comprimento é obrigatório'),
-  fabricante: z.string().min(1, 'Fabricante é obrigatório'),
-  modelo: z.string().min(1, 'Modelo é obrigatório'),
+  fabricante: z.string().optional(),
+  modelo: z.string().optional(),
   emissor_type: z.enum(['MICROMICROASPERSOR', 'GOTEJAMENTO']),
   energia_tipo: z.string().min(1, 'Tipo de energia é obrigatório'),
   potencia_motor: z.string().min(1, 'Potência do motor é obrigatória'),
@@ -126,20 +123,17 @@ export default function CreateAreaPage() {
 
       if (data.tipo_sistema === 'SETOR_HIDRAULICO') {
         payload.setor_hidraulico = {
-          fabricante: data.fabricante,
-          modelo: data.modelo,
+          fabricante: data.fabricante || undefined,
+          modelo: data.modelo || undefined,
           vazao_nominal: parseFloat(data.vazao_nominal),
           pressao_trabalho: parseFloat(data.pressao_trabalho),
-          pressao_recomendada: parseFloat(data.pressao_recomendada),
           dist_emissores: parseFloat(data.dist_emissores),
           dist_laterais: parseFloat(data.dist_laterais),
           filtro_tipo: data.filtro_tipo,
           malha_filtro: data.malha_filtro,
-          pressao_entrada: parseFloat(data.pressao_entrada),
           valvula_tipo: data.valvula_tipo,
           energia_tipo: data.energia_tipo,
-          condicoes_gerais: data.condicoes_gerais,
-          num_emissores: parseInt(data.num_emissores),
+          condicoes_gerais: data.condicoes_gerais || undefined,
           freq_manutencao: data.freq_manutencao,
           data_ultima_manutencao: new Date(data.data_ultima_manutencao).toISOString(),
           emissor_type: data.emissor_type,
@@ -149,8 +143,8 @@ export default function CreateAreaPage() {
         payload.pivo_central = {
           num_torres: parseInt(data.num_torres),
           comprimento: parseFloat(data.comprimento),
-          fabricante: data.fabricante,
-          modelo: data.modelo,
+          fabricante: data.fabricante || undefined,
+          modelo: data.modelo || undefined,
           emissor_type: data.emissor_type,
           energia_tipo: data.energia_tipo,
           potencia_motor: parseFloat(data.potencia_motor),
@@ -332,7 +326,7 @@ export default function CreateAreaPage() {
                   </div>
 
                   <div className='space-y-2'>
-                    <Label htmlFor='fabricante'>Fabricante do Emissor *</Label>
+                    <Label htmlFor='fabricante'>Fabricante do Emissor (Opcional)</Label>
                     <Input
                       id='fabricante'
                       type='text'
@@ -345,7 +339,7 @@ export default function CreateAreaPage() {
                   </div>
 
                   <div className='space-y-2'>
-                    <Label htmlFor='modelo'>Modelo do Emissor *</Label>
+                    <Label htmlFor='modelo'>Modelo do Emissor (Opcional)</Label>
                     <Input
                       id='modelo'
                       type='text'
@@ -370,19 +364,6 @@ export default function CreateAreaPage() {
                       <p className='text-sm text-red-500'>{errors.vazao_nominal.message}</p>
                     )}
                   </div>
-
-                  <div className='space-y-2'>
-                    <Label htmlFor='num_emissores'>Número de Emissores *</Label>
-                    <Input
-                      id='num_emissores'
-                      type='number'
-                      placeholder='Ex: 1000'
-                      {...register('num_emissores')}
-                    />
-                    {errors.num_emissores && (
-                      <p className='text-sm text-red-500'>{errors.num_emissores.message}</p>
-                    )}
-                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -404,34 +385,6 @@ export default function CreateAreaPage() {
                     />
                     {errors.pressao_trabalho && (
                       <p className='text-sm text-red-500'>{errors.pressao_trabalho.message}</p>
-                    )}
-                  </div>
-
-                  <div className='space-y-2'>
-                    <Label htmlFor='pressao_recomendada'>Pressão Recomendada (mca) *</Label>
-                    <Input
-                      id='pressao_recomendada'
-                      type='number'
-                      step='0.01'
-                      placeholder='Ex: 12'
-                      {...register('pressao_recomendada')}
-                    />
-                    {errors.pressao_recomendada && (
-                      <p className='text-sm text-red-500'>{errors.pressao_recomendada.message}</p>
-                    )}
-                  </div>
-
-                  <div className='space-y-2'>
-                    <Label htmlFor='pressao_entrada'>Pressão de Entrada (mca) *</Label>
-                    <Input
-                      id='pressao_entrada'
-                      type='number'
-                      step='0.01'
-                      placeholder='Ex: 15'
-                      {...register('pressao_entrada')}
-                    />
-                    {errors.pressao_entrada && (
-                      <p className='text-sm text-red-500'>{errors.pressao_entrada.message}</p>
                     )}
                   </div>
 
@@ -560,7 +513,7 @@ export default function CreateAreaPage() {
                 </div>
 
                 <div className='space-y-2'>
-                  <Label htmlFor='condicoes_gerais'>Condições Gerais do Setor *</Label>
+                  <Label htmlFor='condicoes_gerais'>Condições Gerais do Setor (Opcional)</Label>
                   <Textarea
                     id='condicoes_gerais'
                     placeholder='Descreva as condições gerais, observações sobre manutenção, limpeza, obstruções, etc.'
@@ -586,7 +539,7 @@ export default function CreateAreaPage() {
               <CardContent className='space-y-4'>
                 <div className='grid md:grid-cols-2 gap-4'>
                   <div className='space-y-2'>
-                    <Label htmlFor='fabricante'>Fabricante *</Label>
+                    <Label htmlFor='fabricante'>Fabricante (Opcional)</Label>
                     <Input
                       id='fabricante'
                       type='text'
@@ -599,7 +552,7 @@ export default function CreateAreaPage() {
                   </div>
 
                   <div className='space-y-2'>
-                    <Label htmlFor='modelo'>Modelo *</Label>
+                    <Label htmlFor='modelo'>Modelo (Opcional)</Label>
                     <Input
                       id='modelo'
                       type='text'

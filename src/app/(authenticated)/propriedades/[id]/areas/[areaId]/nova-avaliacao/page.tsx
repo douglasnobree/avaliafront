@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -18,16 +18,18 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { MeasurementGrid } from '@/components/ui/measurement-grid';
 import api from '@/lib/api';
+import { useSession } from '@/lib/auth-client';
 
 const medicaoSchema = z.object({
+  sequencia: z.number(),
   volume: z.string().min(1, 'Volume é obrigatório'),
   tempo: z.string().min(1, 'Tempo é obrigatório'),
   vazao: z.string().optional(),
 });
 
 const novaAvaliacaoSchema = z.object({
-  area_irrigada: z.string().min(1, 'Área irrigada é obrigatória'),
   medicoes: z.array(medicaoSchema).min(1, 'Adicione pelo menos uma medição'),
   comentarios: z.string().optional(),
   recomendacoes: z.string().optional(),
@@ -37,10 +39,13 @@ type NovaAvaliacaoFormData = z.infer<typeof novaAvaliacaoSchema>;
 
 export default function NovaAvaliacaoPage() {
   const [loading, setLoading] = useState(false);
+  const [areaInfo, setAreaInfo] = useState<any>(null);
+  const [gridPoints, setGridPoints] = useState<any[]>([]);
   const router = useRouter();
   const params = useParams();
   const propertyId = params?.id as string;
   const areaId = params?.areaId as string;
+  const { data: session } = useSession();
 
   const {
     register,
@@ -52,7 +57,12 @@ export default function NovaAvaliacaoPage() {
   } = useForm<NovaAvaliacaoFormData>({
     resolver: zodResolver(novaAvaliacaoSchema),
     defaultValues: {
-      medicoes: [{ volume: '', tempo: '', vazao: '' }],
+      medicoes: [
+        { sequencia: 1, volume: '', tempo: '', vazao: '' },
+        { sequencia: 2, volume: '', tempo: '', vazao: '' },
+        { sequencia: 3, volume: '', tempo: '', vazao: '' },
+        { sequencia: 4, volume: '', tempo: '', vazao: '' },
+      ],
     },
   });
 
@@ -61,24 +71,47 @@ export default function NovaAvaliacaoPage() {
     name: 'medicoes',
   });
 
+  // Buscar informações da área
+  useEffect(() => {
+    const fetchAreaInfo = async () => {
+      try {
+        const response = await api.get(`/areas/${areaId}`);
+        setAreaInfo(response.data);
+      } catch (error) {
+        console.error('Erro ao buscar área:', error);
+        toast.error('Erro ao carregar informações da área');
+      }
+    };
+
+    if (areaId) {
+      fetchAreaInfo();
+    }
+  }, [areaId]);
+
   // Calcular vazão automaticamente
   const calcularVazao = (index: number) => {
     const medicoes = watch('medicoes');
     const medicao = medicoes[index];
     
     if (medicao?.volume && medicao?.tempo) {
-      const volume = parseFloat(medicao.volume);
-      const tempo = parseFloat(medicao.tempo);
+      const volume = parseFloat(medicao.volume); // Volume em mL
+      const tempo = parseFloat(medicao.tempo);   // Tempo em segundos
       
       if (volume > 0 && tempo > 0) {
-        // Vazão em L/h = (Volume em L / Tempo em minutos) * 60
-        const vazao = (volume / tempo) * 60;
+        // Vazão em L/h = (Volume em mL / Tempo em seg) * 3.6
+        // Convertendo: mL/s → L/h = (mL/s) * (1L/1000mL) * (3600s/1h) = mL/s * 3.6
+        const vazao = (volume / tempo) * 3.6;
         setValue(`medicoes.${index}.vazao`, vazao.toFixed(2));
       }
     }
   };
 
   const onSubmit = async (data: NovaAvaliacaoFormData) => {
+    if (!session?.user?.id) {
+      toast.error('Usuário não autenticado');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -101,35 +134,39 @@ export default function NovaAvaliacaoPage() {
         vazoesSorted.slice(0, n25).reduce((a, b) => a + b, 0) / n25;
       const cud = (media25Menores / vazaoMedia) * 100;
 
+      const totalVolume = data.medicoes.reduce(
+        (sum, m) => sum + parseFloat(m.volume),
+        0
+      );
+      const totalTempo = data.medicoes.reduce(
+        (sum, m) => sum + parseFloat(m.tempo),
+        0
+      );
+
       const avaliacaoData = {
-        area_irrigada: parseFloat(data.area_irrigada),
-        volume_agua: data.medicoes.reduce(
-          (sum, m) => sum + parseFloat(m.volume),
-          0
-        ),
-        tempo_irrigacao: data.medicoes.reduce(
-          (sum, m) => sum + parseFloat(m.tempo),
-          0
-        ),
+        unidade_id: areaId,
+        area_irrigada: areaInfo?.area_ha || 0,
+        volume_agua: totalVolume,
+        tempo_irrigacao: totalTempo,
         cud: Math.min(100, Math.max(0, cud)),
         cuc: Math.min(100, Math.max(0, cuc)),
-        data: new Date().toISOString(),
-        unidade_id: areaId,
         offline_status: false,
-        avaliador_id: 'current-user-id', // Substituir pelo ID real do usuário
         unidade_type: 'SETOR_HIDRAULICO',
+        // setor_id e pivo_id não são enviados - eles referenciam equipamentos específicos
         pontos: data.medicoes.map((m, index) => ({
+          sequencia: m.sequencia,
           eixo_x: index % 5,
           eixo_y: Math.floor(index / 5),
-          volume_ml: parseFloat(m.volume) * 1000,
-          tempo_seg: parseFloat(m.tempo) * 60,
+          distancia: index * 10, // Distância estimada
+          diametro_coletor: 100, // Valor padrão já que não é solicitado para setor localizado
+          volume_ml: parseFloat(m.volume), // Já está em mL
+          tempo_seg: parseFloat(m.tempo), // Já está em segundos
           vazao_l_h: parseFloat(m.vazao || '0'),
         })),
-        comentarios: data.comentarios,
-        recomendacoes: data.recomendacoes,
+        comentarios: data.comentarios || undefined,
+        recomendacoes: data.recomendacoes || undefined,
       };
 
-      // Você precisará criar este endpoint no backend
       await api.post('/avaliacoes', avaliacaoData);
 
       toast.success('Avaliação criada com sucesso!');
@@ -162,22 +199,25 @@ export default function NovaAvaliacaoPage() {
           </CardHeader>
           <CardContent className='space-y-4'>
             <div className='space-y-2'>
-              <Label htmlFor='area_irrigada'>Área Irrigada (hectares) *</Label>
-              <Input
-                id='area_irrigada'
-                type='number'
-                step='0.01'
-                placeholder='Ex: 15.5'
-                {...register('area_irrigada')}
-              />
-              {errors.area_irrigada && (
-                <p className='text-sm text-red-500'>
-                  {errors.area_irrigada.message}
+              <Label>Área Irrigada (hectares)</Label>
+              <div className='p-3 bg-secondary rounded-md'>
+                <p className='text-lg font-semibold text-green-600'>
+                  {areaInfo?.area_ha || 0} ha
                 </p>
-              )}
+                <p className='text-sm text-muted-foreground mt-1'>
+                  Área cadastrada para esta unidade avaliada
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>
+
+        {/* Grid Visual de Pontos de Medição */}
+        <MeasurementGrid
+          numLinhas={4}
+          numEmissores={4}
+          onGridChange={setGridPoints}
+        />
 
         {/* Medições */}
         <Card>
@@ -186,14 +226,19 @@ export default function NovaAvaliacaoPage() {
               <div>
                 <CardTitle>Medições por Linha de Irrigação</CardTitle>
                 <CardDescription>
-                  Adicione as medições de volume, tempo e vazão
+                  Adicione as medições de volume, tempo e vazão para cada ponto marcado no mapa
                 </CardDescription>
               </div>
               <Button
                 type='button'
                 variant='outline'
                 size='sm'
-                onClick={() => append({ volume: '', tempo: '', vazao: '' })}>
+                onClick={() => append({ 
+                  sequencia: fields.length + 1, 
+                  volume: '', 
+                  tempo: '', 
+                  vazao: '' 
+                })}>
                 <Plus className='w-4 h-4 mr-2' />
                 Adicionar Linha
               </Button>
@@ -204,17 +249,22 @@ export default function NovaAvaliacaoPage() {
               {fields.map((field, index) => (
                 <Card key={field.id} className='bg-secondary/20'>
                   <CardContent className='pt-6'>
+                    <div className='flex items-center justify-between mb-4'>
+                      <h3 className='text-lg font-semibold text-green-600'>
+                        Linha {index + 1} - Emissor {index + 1}
+                      </h3>
+                    </div>
                     <div className='flex items-start gap-4'>
                       <div className='flex-1 space-y-4'>
-                        <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+                        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
                           <div className='space-y-2'>
                             <Label htmlFor={`medicoes.${index}.volume`}>
-                              Volume (L) *
+                              Volume (mL) *
                             </Label>
                             <Input
                               id={`medicoes.${index}.volume`}
                               type='number'
-                              step='0.01'
+                              step='1'
                               placeholder='Ex: 150'
                               {...register(`medicoes.${index}.volume`)}
                               onBlur={() => calcularVazao(index)}
@@ -228,12 +278,12 @@ export default function NovaAvaliacaoPage() {
 
                           <div className='space-y-2'>
                             <Label htmlFor={`medicoes.${index}.tempo`}>
-                              Tempo (min) *
+                              Tempo (seg) *
                             </Label>
                             <Input
                               id={`medicoes.${index}.tempo`}
                               type='number'
-                              step='0.01'
+                              step='1'
                               placeholder='Ex: 60'
                               {...register(`medicoes.${index}.tempo`)}
                               onBlur={() => calcularVazao(index)}
