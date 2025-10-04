@@ -27,7 +27,7 @@ import {
 
 interface Area {
   id: string;
-  indentificacao: string;
+  identificacao: string;
   area_ha: number;
 }
 
@@ -56,7 +56,7 @@ export default function RelatoriosPage() {
       // Mock temporário
       setArea({
         id: areaId,
-        indentificacao: 'Área 1',
+        identificacao: 'Área 1',
         area_ha: 15.5,
       });
 
@@ -117,7 +117,9 @@ export default function RelatoriosPage() {
       {/* Header */}
       <div className='flex items-start justify-between'>
         <div>
-          <h1 className='text-3xl font-bold'>Relatórios - {area?.indentificacao}</h1>
+          <h1 className='text-3xl font-bold'>
+            Relatórios - {area?.identificacao}
+          </h1>
           <p className='text-muted-foreground mt-2'>
             Análise comparativa das avaliações realizadas
           </p>
