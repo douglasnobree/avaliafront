@@ -27,7 +27,7 @@ import {
 
 interface Area {
   id: string;
-  indentificacao: string;
+  identificacao: string;
   area_ha: number;
 }
 
@@ -90,7 +90,9 @@ export default function RelatoriosPage() {
       {/* Header */}
       <div className='flex items-start justify-between'>
         <div>
-          <h1 className='text-3xl font-bold'>Relatórios - {area?.indentificacao}</h1>
+          <h1 className='text-3xl font-bold'>
+            Relatórios - {area?.identificacao}
+          </h1>
           <p className='text-muted-foreground mt-2'>
             Análise comparativa das avaliações realizadas
           </p>

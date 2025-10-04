@@ -2,29 +2,18 @@
 
 import { useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 import { toast } from 'sonner';
-import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { Loader2 } from 'lucide-react';
+
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+  createAreaSchema,
+  type CreateAreaFormData,
+} from '../../../../../components/createSectors/form-schemas';
+import { AreaTypeSelector } from '../../../../../components/createSectors/area-type-selector';
+import { SetorHidraulicoForm } from '../../../../../components/createSectors/setor-hidraulico-form';
+import { PivoCentralForm } from '../../../../../components/createSectors/pivo-central-form';
 import api from '@/lib/api';
 
 // Schema para Setor Hidráulico (Irrigação Localizada)
@@ -86,33 +75,24 @@ type CreateAreaFormData = z.infer<typeof createAreaSchema>;
 export default function CreateAreaPage() {
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<'tipo' | 'dados'>('tipo');
-  const [tipoSistema, setTipoSistema] = useState<'SETOR_HIDRAULICO' | 'PIVO_CENTRAL' | null>(null);
+  const [tipo_setor, settipo_setor] = useState<
+    'SETOR_HIDRAULICO' | 'PIVO_CENTRAL' | null
+  >(null);
   const router = useRouter();
   const params = useParams();
   const propertyId = params?.id as string;
-
+  const { data } = useSession();
+  const userId = data?.user.id; 
   const form = useForm<CreateAreaFormData>({
     resolver: zodResolver(createAreaSchema),
   });
 
-  const {
-    register,
-    handleSubmit,
-    control,
-    formState: { errors: formErrors },
-    setValue,
-    watch,
-  } = form;
-
-  const tipoSistemaWatch = watch('tipo_sistema');
-  
-  // Type assertion para evitar erros de discriminated union
-  const errors = formErrors as any;
-
-  const onSubmit = async (data: CreateAreaFormData) => {
+  const handleSubmit = async (data: CreateAreaFormData) => {
     setLoading(true);
+    console.log('Dados do formulário:', data);
 
     try {
+      // Preparar payload baseado no tipo de sistema
       let payload: any = {
         area: {
           indentificacao: data.indentificacao,
@@ -138,9 +118,14 @@ export default function CreateAreaPage() {
           data_ultima_manutencao: new Date(data.data_ultima_manutencao).toISOString(),
           emissor_type: data.emissor_type,
           tipo_setor: 'SETOR_HIDRAULICO',
+          userId: userId,
         };
-      } else if (data.tipo_sistema === 'PIVO_CENTRAL') {
-        payload.pivo_central = {
+
+        console.log('Payload setor hidráulico:', payload);
+        await api.post('/hydraulic-sector', payload);
+      } else if (data.tipo_setor === 'PIVO_CENTRAL') {
+        payload = {
+          ...payload,
           num_torres: parseInt(data.num_torres),
           comprimento: parseFloat(data.comprimento),
           fabricante: data.fabricante || undefined,
@@ -156,10 +141,10 @@ export default function CreateAreaPage() {
           velocidade: parseFloat(data.velocidade),
           bocal_tipo: data.bocal_tipo,
           pressao_bocal: parseFloat(data.pressao_bocal),
-          data_ultima_manutencao: new Date(data.data_ultima_manutencao).toISOString(),
-          freq_manutencao: data.freq_manutencao,
+          data_ultima_avaliacoes: new Date(
+            data.data_ultima_avaliacoes
+          ).toISOString(),
           problemas_observados: data.problemas_observados || '',
-          data_ultima_avaliacoes: new Date(data.data_ultima_avaliacoes).toISOString(),
         };
       }
 
@@ -169,87 +154,40 @@ export default function CreateAreaPage() {
       router.push(`/propriedades/${propertyId}`);
     } catch (error: any) {
       console.error('Erro ao criar área:', error);
-      toast.error(
-        error?.response?.data?.message || 'Erro ao criar área'
-      );
+      toast.error(error?.response?.data?.message || 'Erro ao criar área');
     } finally {
       setLoading(false);
     }
   };
 
   const handleSelectTipo = (tipo: 'SETOR_HIDRAULICO' | 'PIVO_CENTRAL') => {
-    setTipoSistema(tipo);
-    setValue('tipo_sistema', tipo);
+    settipo_setor(tipo);
+    form.setValue('tipo_setor', tipo);
+    form.setValue('propriedade_id', propertyId);
     setStep('dados');
   };
 
   // Etapa 1: Escolher tipo de sistema
   if (step === 'tipo') {
     return (
-      <div className='max-w-4xl mx-auto space-y-6'>
-        <div>
-          <h1 className='text-3xl font-bold'>Criar Nova Área</h1>
-          <p className='text-muted-foreground mt-2'>
-            Escolha o tipo de sistema de irrigação
-          </p>
-        </div>
-
-        <div className='grid md:grid-cols-2 gap-6'>
-          <Card 
-            className='cursor-pointer hover:border-primary transition-colors'
-            onClick={() => handleSelectTipo('SETOR_HIDRAULICO')}
-          >
-            <CardHeader>
-              <CardTitle>🌊 Irrigação Localizada</CardTitle>
-              <CardDescription>
-                Setor Hidráulico (Gotejamento ou Microaspersão)
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className='text-sm text-muted-foreground'>
-                Sistema de irrigação localizada com emissores (gotejadores ou microaspersores).
-                Ideal para culturas em linha, pomares e hortaliças.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card 
-            className='cursor-pointer hover:border-primary transition-colors'
-            onClick={() => handleSelectTipo('PIVO_CENTRAL')}
-          >
-            <CardHeader>
-              <CardTitle>🎡 Pivô Central</CardTitle>
-              <CardDescription>
-                Sistema de irrigação por aspersão mecanizada
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className='text-sm text-muted-foreground'>
-                Sistema de irrigação mecanizado com torres móveis em movimento circular.
-                Ideal para grandes áreas de grãos e pastagens.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        <Button
-          type='button'
-          variant='outline'
-          onClick={() => router.push(`/propriedades/${propertyId}`)}
-        >
-          <ChevronLeft className='w-4 h-4 mr-2' />
-          Voltar
-        </Button>
-      </div>
+      <AreaTypeSelector
+        onSelectTipo={handleSelectTipo}
+        onBack={() => router.push(`/propriedades/${propertyId}`)}
+      />
     );
   }
 
   // Etapa 2: Formulário de dados
+  const Form =
+    tipo_setor === 'SETOR_HIDRAULICO' ? SetorHidraulicoForm : PivoCentralForm;
+
   return (
     <div className='max-w-4xl mx-auto space-y-6'>
       <div>
         <h1 className='text-3xl font-bold'>
-          {tipoSistema === 'SETOR_HIDRAULICO' ? 'Setor Hidráulico' : 'Pivô Central'}
+          {tipo_setor === 'SETOR_HIDRAULICO'
+            ? 'Setor Hidráulico'
+            : 'Pivô Central'}
         </h1>
         <p className='text-muted-foreground mt-2'>
           Preencha os dados técnicos do sistema de irrigação

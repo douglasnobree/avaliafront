@@ -39,7 +39,7 @@ interface Property {
 
 interface Area {
   id: string;
-  indentificacao: string;
+  identificacao: string;
   area_ha: number;
   propriedade_id: string;
   ultimaAvaliacao?: {
@@ -70,7 +70,9 @@ export default function PropertyDetailPage() {
       setProperty(propertyResponse.data);
 
       // Carrega áreas (unidades avaliadas) da propriedade
-      const areasResponse = await api.get(`/areas/property/${propertyId}`);
+      const areasResponse = await api.get(
+        `/hydraulic-sector/property/${propertyId}/areas`
+      );
       setAreas(areasResponse.data);
     } catch (error: any) {
       console.error('Erro ao carregar dados:', error);
@@ -259,13 +261,11 @@ export default function PropertyDetailPage() {
                   key={area.id}
                   className='cursor-pointer hover:shadow-md transition-shadow'
                   onClick={() =>
-                    router.push(
-                      `/propriedades/${property.id}/areas/${area.id}`
-                    )
+                    router.push(`/propriedades/${property.id}/areas/${area.id}`)
                   }>
                   <CardHeader>
                     <CardTitle className='text-lg'>
-                      {area.indentificacao}
+                      {area.identificacao}
                     </CardTitle>
                     <CardDescription>{area.area_ha} ha</CardDescription>
                   </CardHeader>
@@ -283,17 +283,13 @@ export default function PropertyDetailPage() {
                         </div>
                         <div className='grid grid-cols-2 gap-2 mt-3'>
                           <div className='p-2 bg-secondary rounded-md'>
-                            <p className='text-xs text-muted-foreground'>
-                              CUD
-                            </p>
+                            <p className='text-xs text-muted-foreground'>CUD</p>
                             <p className='font-semibold'>
                               {area.ultimaAvaliacao.cud.toFixed(1)}%
                             </p>
                           </div>
                           <div className='p-2 bg-secondary rounded-md'>
-                            <p className='text-xs text-muted-foreground'>
-                              CUC
-                            </p>
+                            <p className='text-xs text-muted-foreground'>CUC</p>
                             <p className='font-semibold'>
                               {area.ultimaAvaliacao.cuc.toFixed(1)}%
                             </p>

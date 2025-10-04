@@ -100,7 +100,7 @@ Quando o formulário é submetido, ele envia um payload estruturado para o endpo
 ```json
 {
   "area": {
-    "indentificacao": "Setor 1 - Bananal",
+    "identificacao": "Setor 1 - Bananal",
     "area_ha": 10.5,
     "propriedade_id": "uuid"
   },
@@ -131,7 +131,7 @@ Quando o formulário é submetido, ele envia um payload estruturado para o endpo
 ```json
 {
   "area": {
-    "indentificacao": "Pivô 01 - Milho Leste",
+    "identificacao": "Pivô 01 - Milho Leste",
     "area_ha": 50.0,
     "propriedade_id": "uuid"
   },
@@ -238,7 +238,7 @@ async createArea(@Body() dto: CreateAreaDto, @Session() session) {
   // Criar a área
   const area = await this.prisma.unidade_avaliada.create({
     data: {
-      indentificacao: dto.area.indentificacao,
+      identificacao: dto.area.identificacao,
       area_ha: dto.area.area_ha,
       propriedade_id: dto.area.propriedade_id,
     }

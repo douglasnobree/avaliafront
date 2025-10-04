@@ -27,7 +27,7 @@ import Link from 'next/link';
 
 interface Area {
   id: string;
-  indentificacao: string;
+  identificacao: string;
   area_ha: number;
   propriedade_id: string;
 }
@@ -132,7 +132,7 @@ export default function AreaDetailPage() {
       {/* Header */}
       <div className='flex items-start justify-between'>
         <div>
-          <h1 className='text-3xl font-bold'>{area.indentificacao}</h1>
+          <h1 className='text-3xl font-bold'>{area.identificacao}</h1>
           <p className='text-muted-foreground mt-2'>
             Área: {area.area_ha} hectares
           </p>
