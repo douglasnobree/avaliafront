@@ -352,7 +352,7 @@ export default function PropertyDetailPage() {
                         className='cursor-pointer hover:shadow-md transition-shadow'
                         onClick={() =>
                           router.push(
-                            `/propriedades/${property.id}/areas/${setor.id}`
+                            `/propriedades/${property.id}/areas/${setor.id}?tipo=setor_hidraulico`
                           )
                         }>
                         <CardHeader>
@@ -425,7 +425,7 @@ export default function PropertyDetailPage() {
                         className='cursor-pointer hover:shadow-md transition-shadow'
                         onClick={() =>
                           router.push(
-                            `/propriedades/${property.id}/areas/${pivo.id}`
+                            `/propriedades/${property.id}/areas/${pivo.id}?tipo=pivo_central`
                           )
                         }>
                         <CardHeader>
