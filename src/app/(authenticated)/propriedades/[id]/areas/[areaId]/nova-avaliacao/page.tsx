@@ -55,7 +55,8 @@ export default function NovaAvaliacaoPage() {
     const fetchAreaInfo = async () => {
       try {
         const response = await api.get(`/areas/${areaId}`);
-        setAreaInfo(response.data);
+        const areaData = response.data?.data || response.data;
+        setAreaInfo(areaData);
       } catch (error) {
         console.error('Erro ao buscar área:', error);
         toast.error('Erro ao carregar informações da área');

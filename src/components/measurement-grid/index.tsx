@@ -8,7 +8,7 @@ import { GridDisplay } from './components/grid-display';
 import { GridStats } from './components/grid-stats';
 import { MeasurementModal } from './components/measurement-modal';
 
-export function MeasurementGrid({ onGridChange, initialGrid = [] }: MeasurementGridProps) {
+export function MeasurementGrid({ onGridChange, initialGrid = [], readOnly = false }: MeasurementGridProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedPoint, setSelectedPoint] = useState<{ linha: number; emissor: number } | null>(
     null
@@ -28,6 +28,7 @@ export function MeasurementGrid({ onGridChange, initialGrid = [] }: MeasurementG
   });
 
   const handlePointClick = (linha: number, emissor: number) => {
+    if (readOnly) return; // Não abre modal em modo somente leitura
     setSelectedPoint({ linha, emissor });
     setModalOpen(true);
   };
@@ -46,16 +47,16 @@ export function MeasurementGrid({ onGridChange, initialGrid = [] }: MeasurementG
 
   return (
     <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-lg">Marcação de Pontos</CardTitle>
-            <CardDescription className="text-sm">
+      <CardHeader className="p-4 md:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <CardTitle className="text-base md:text-lg">Marcação de Pontos</CardTitle>
+            <CardDescription className="text-xs md:text-sm mt-1">
               Clique nas bolinhas para fazer a avaliação de cada ponto
             </CardDescription>
           </div>
-          <div className="text-right">
-            <p className="text-2xl font-bold text-foreground">
+          <div className="text-left sm:text-right flex-shrink-0">
+            <p className="text-xl md:text-2xl font-bold text-foreground">
               {getMedidosCount()}/{getTotalPoints()}
             </p>
             <p className="text-xs text-muted-foreground">medidos</p>
@@ -63,8 +64,8 @@ export function MeasurementGrid({ onGridChange, initialGrid = [] }: MeasurementG
         </div>
       </CardHeader>
 
-      <CardContent>
-        <div className="space-y-4">
+      <CardContent className="p-4 md:p-6">
+        <div className="space-y-3 md:space-y-4">
           <GridControls
             numEmissores={numEmissores}
             onAddColumn={addColumn}

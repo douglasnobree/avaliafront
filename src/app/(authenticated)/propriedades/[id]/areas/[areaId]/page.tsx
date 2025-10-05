@@ -61,11 +61,13 @@ export default function AreaDetailPage() {
     try {
       // Carrega dados da área
       const areaResponse = await api.get(`/areas/${areaId}`);
-      setArea(areaResponse.data);
+      const areaData = areaResponse.data?.data || areaResponse.data;
+      setArea(areaData);
 
       // Carrega avaliações da área
       const avaliacoesResponse = await api.get(`/avaliacoes/area/${areaId}`);
-      setAvaliacoes(avaliacoesResponse.data);
+      const avaliacoesData = avaliacoesResponse.data?.data || avaliacoesResponse.data || [];
+      setAvaliacoes(Array.isArray(avaliacoesData) ? avaliacoesData : []);
     } catch (error: any) {
       console.error('Erro ao carregar dados:', error);
       toast.error('Erro ao carregar dados da área');

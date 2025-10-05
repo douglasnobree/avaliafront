@@ -36,8 +36,10 @@ export default function PropertiesPage() {
 
   const loadProperties = async () => {
     try {
-      const response = await api.get('property/my-properties');
-      setProperties(response.data);
+      const response = await api.get('/property/my-properties');
+      // O backend retorna { success: true, data: [...], ... }
+      const data = response.data?.data || response.data || [];
+      setProperties(Array.isArray(data) ? data : []);
     } catch (error: any) {
       console.error('Erro ao carregar propriedades:', error);
       toast.error('Erro ao carregar propriedades');

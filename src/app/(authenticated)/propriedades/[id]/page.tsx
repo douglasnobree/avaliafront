@@ -67,13 +67,15 @@ export default function PropertyDetailPage() {
     try {
       // Carrega dados da propriedade
       const propertyResponse = await api.get(`/property/${propertyId}`);
-      setProperty(propertyResponse.data);
+      const propertyData = propertyResponse.data?.data || propertyResponse.data;
+      setProperty(propertyData);
 
       // Carrega áreas (unidades avaliadas) da propriedade
       const areasResponse = await api.get(
         `/areas/property/${propertyId}`
       );
-      setAreas(areasResponse.data);
+      const areasData = areasResponse.data?.data || areasResponse.data || [];
+      setAreas(Array.isArray(areasData) ? areasData : []);
     } catch (error: any) {
       console.error('Erro ao carregar dados:', error);
       toast.error('Erro ao carregar dados da propriedade');
@@ -123,22 +125,23 @@ export default function PropertyDetailPage() {
   }
 
   return (
-    <div className='max-w-6xl mx-auto space-y-6'>
+    <div className='max-w-6xl mx-auto space-y-4 md:space-y-6 px-4 md:px-0'>
       {/* Header com info da propriedade */}
-      <div className='flex items-start justify-between'>
-        <div>
-          <h1 className='text-3xl font-bold'>{property.nome}</h1>
+      <div className='flex flex-col md:flex-row md:items-start md:justify-between gap-4'>
+        <div className='min-w-0 flex-1'>
+          <h1 className='text-2xl md:text-3xl font-bold truncate'>{property.nome}</h1>
           <div className='flex items-center gap-2 text-muted-foreground mt-2'>
-            <MapPin className='w-4 h-4' />
-            <span>
+            <MapPin className='w-4 h-4 flex-shrink-0' />
+            <span className='text-sm md:text-base truncate'>
               {property.municipio} - {property.estado}
             </span>
           </div>
         </div>
-        <div className='flex gap-2'>
+        <div className='flex flex-col sm:flex-row gap-2'>
           <Button
             variant='outline'
             onClick={() => router.push(`/propriedades/${propertyId}/editar`)}
+            className='w-full sm:w-auto'
           >
             <Pencil className='w-4 h-4 mr-2' />
             Editar
@@ -146,11 +149,12 @@ export default function PropertyDetailPage() {
           <Button
             variant='destructive'
             onClick={() => setDeleteDialogOpen(true)}
+            className='w-full sm:w-auto'
           >
             <Trash2 className='w-4 h-4 mr-2' />
             Excluir
           </Button>
-          <Button onClick={() => router.push('/propriedades')}>Voltar</Button>
+          <Button onClick={() => router.push('/propriedades')} className='w-full sm:w-auto'>Voltar</Button>
         </div>
       </div>
 
@@ -164,43 +168,43 @@ export default function PropertyDetailPage() {
       />
 
       {/* Cards com informações da propriedade */}
-      <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+      <div className='grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6'>
         <Card>
-          <CardHeader>
-            <CardTitle>Informações do Proprietário</CardTitle>
+          <CardHeader className='p-4 md:p-6'>
+            <CardTitle className='text-base md:text-lg'>Informações do Proprietário</CardTitle>
           </CardHeader>
-          <CardContent className='space-y-3'>
+          <CardContent className='space-y-3 p-4 pt-0 md:p-6 md:pt-0'>
             <div>
-              <p className='text-sm text-muted-foreground'>Nome</p>
-              <p className='font-medium'>{property.proprietario}</p>
+              <p className='text-xs md:text-sm text-muted-foreground'>Nome</p>
+              <p className='font-medium text-sm md:text-base break-words'>{property.proprietario}</p>
             </div>
             <div>
-              <p className='text-sm text-muted-foreground'>Telefone</p>
-              <p className='font-medium'>{property.telefone}</p>
+              <p className='text-xs md:text-sm text-muted-foreground'>Telefone</p>
+              <p className='font-medium text-sm md:text-base'>{property.telefone}</p>
             </div>
             <div>
-              <p className='text-sm text-muted-foreground'>Email</p>
-              <p className='font-medium'>{property.email}</p>
+              <p className='text-xs md:text-sm text-muted-foreground'>Email</p>
+              <p className='font-medium text-sm md:text-base break-all'>{property.email}</p>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Dados da Propriedade</CardTitle>
+          <CardHeader className='p-4 md:p-6'>
+            <CardTitle className='text-base md:text-lg'>Dados da Propriedade</CardTitle>
           </CardHeader>
-          <CardContent className='space-y-3'>
+          <CardContent className='space-y-3 p-4 pt-0 md:p-6 md:pt-0'>
             <div>
-              <p className='text-sm text-muted-foreground'>Área Total</p>
-              <p className='font-medium'>{property.area_total} ha</p>
+              <p className='text-xs md:text-sm text-muted-foreground'>Área Total</p>
+              <p className='font-medium text-sm md:text-base'>{property.area_total} ha</p>
             </div>
             <div>
-              <p className='text-sm text-muted-foreground'>Área Irrigada</p>
-              <p className='font-medium'>{property.area_irrigada} ha</p>
+              <p className='text-xs md:text-sm text-muted-foreground'>Área Irrigada</p>
+              <p className='font-medium text-sm md:text-base'>{property.area_irrigada} ha</p>
             </div>
             <div>
-              <p className='text-sm text-muted-foreground'>Coordenadas</p>
-              <p className='font-medium'>
+              <p className='text-xs md:text-sm text-muted-foreground'>Coordenadas</p>
+              <p className='font-medium text-sm md:text-base'>
                 {property.latitude}, {property.longitude}
               </p>
             </div>
@@ -210,41 +214,41 @@ export default function PropertyDetailPage() {
 
       {property.observacoes && (
         <Card>
-          <CardHeader>
-            <CardTitle>Observações</CardTitle>
+          <CardHeader className='p-4 md:p-6'>
+            <CardTitle className='text-base md:text-lg'>Observações</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className='text-muted-foreground'>{property.observacoes}</p>
+          <CardContent className='p-4 pt-0 md:p-6 md:pt-0'>
+            <p className='text-sm md:text-base text-muted-foreground'>{property.observacoes}</p>
           </CardContent>
         </Card>
       )}
 
       {/* Áreas da Fazenda */}
       <Card>
-        <CardHeader>
-          <div className='flex items-center justify-between'>
-            <div>
-              <CardTitle>Áreas da {property.nome}</CardTitle>
-              <CardDescription className='mt-2'>
+        <CardHeader className='p-4 md:p-6'>
+          <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4'>
+            <div className='min-w-0 flex-1'>
+              <CardTitle className='text-base md:text-lg truncate'>Áreas da {property.nome}</CardTitle>
+              <CardDescription className='mt-2 text-xs md:text-sm'>
                 Gerencie as áreas de cultivo e irrigação da propriedade
               </CardDescription>
             </div>
-            <Link href={`/propriedades/${property.id}/criar-area`}>
-              <Button>
+            <Link href={`/propriedades/${property.id}/criar-area`} className='w-full md:w-auto'>
+              <Button className='w-full md:w-auto'>
                 <Plus className='w-4 h-4 mr-2' />
                 Nova Área
               </Button>
             </Link>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className='p-4 pt-0 md:p-6 md:pt-0'>
           {areas.length === 0 ? (
-            <div className='flex flex-col items-center justify-center py-12 text-center'>
-              <BarChart3 className='w-12 h-12 text-muted-foreground mb-4' />
-              <h3 className='text-lg font-semibold mb-2'>
+            <div className='flex flex-col items-center justify-center py-8 md:py-12 text-center px-4'>
+              <BarChart3 className='w-10 h-10 md:w-12 md:h-12 text-muted-foreground mb-4' />
+              <h3 className='text-base md:text-lg font-semibold mb-2'>
                 Nenhuma área cadastrada
               </h3>
-              <p className='text-muted-foreground mb-4'>
+              <p className='text-sm md:text-base text-muted-foreground mb-4'>
                 Comece cadastrando a primeira área desta propriedade
               </p>
               <Link href={`/propriedades/${property.id}/criar-area`}>

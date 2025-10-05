@@ -1,36 +1,122 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🌱 AVAlia Frontend
 
-## Getting Started
+> Interface web moderna e responsiva para o sistema de avaliação de irrigação AVAlia.
 
-First, run the development server:
+## 🚀 Quick Start
 
 ```bash
+# Instalar dependências
+npm install
+
+# Configurar ambiente
+cp .env.example .env.local
+
+# Iniciar servidor de desenvolvimento
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Acesse [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📱 Features
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- ✅ **100% Responsivo** - Mobile, Tablet, Desktop
+- ✅ **Next.js 15** - App Router com React Server Components
+- ✅ **TypeScript** - Type-safe em todo o projeto
+- ✅ **Tailwind CSS** - Estilização moderna e performática
+- ✅ **shadcn/ui** - Componentes UI de alta qualidade
+- ✅ **TanStack Query** - State management e cache inteligente
+- ✅ **Better Auth** - Autenticação segura
+- ✅ **Three.js** - Visualizações 3D interativas
 
-## Learn More
+## 🛠️ Stack Tecnológico
 
-To learn more about Next.js, take a look at the following resources:
+- **Framework:** Next.js 15.5.3
+- **UI Library:** React 19.1.0
+- **Language:** TypeScript 5.x
+- **Styling:** Tailwind CSS 4.x
+- **Components:** shadcn/ui (Radix UI)
+- **State:** TanStack Query 5.x
+- **HTTP Client:** Axios 1.x
+- **Forms:** React Hook Form + Zod
+- **3D Graphics:** Three.js + React Three Fiber
+- **Charts:** Recharts
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📁 Estrutura
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+src/
+├── app/                    # App Router (Next.js 15)
+│   ├── (authenticated)/    # Rotas protegidas
+│   │   ├── dashboard/
+│   │   └── propriedades/
+│   ├── login/
+│   └── criar-conta/
+├── components/             # Componentes reutilizáveis
+│   ├── ui/                 # shadcn/ui components
+│   ├── layouts/            # Layouts (Header, etc)
+│   └── measurement-grid/   # Grid de medição
+├── lib/                    # Utilitários e configs
+│   ├── api.ts              # Cliente Axios
+│   ├── auth-client.ts      # Better Auth
+│   └── utils.ts            # Helpers
+└── hooks/                  # Custom hooks
+```
 
-## Deploy on Vercel
+## 🎨 Responsividade
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+O site é totalmente responsivo seguindo padrões mobile-first:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Mobile:** < 640px
+- **Tablet:** 640px - 1024px
+- **Desktop:** > 1024px
+
+Veja o [Guia de Responsividade](../GUIA-RESPONSIVIDADE.md) para mais detalhes.
+
+## 🧪 Scripts
+
+```bash
+# Desenvolvimento
+npm run dev
+
+# Build para produção
+npm run build
+
+# Iniciar produção
+npm start
+
+# Lint
+npm run lint
+```
+
+## 📚 Documentação
+
+- [Guia de Responsividade](../GUIA-RESPONSIVIDADE.md)
+- [Melhorias Implementadas](../MELHORIAS-IMPLEMENTADAS.md)
+- [Comandos Úteis](../COMANDOS-UTEIS.md)
+- [README Completo](../README-COMPLETO.md)
+
+## 🌐 Deploy
+
+### Vercel (Recomendado)
+```bash
+npm i -g vercel
+vercel --prod
+```
+
+### Netlify
+```bash
+npm run build
+# Fazer upload da pasta .next
+```
+
+## 🤝 Contribuindo
+
+Veja o [README principal](../README-COMPLETO.md) para guidelines de contribuição.
+
+## 📄 Licença
+
+MIT - Veja [LICENSE](LICENSE) para mais detalhes.
+
+---
+
+**Desenvolvido com ❤️ usando Next.js e TypeScript**

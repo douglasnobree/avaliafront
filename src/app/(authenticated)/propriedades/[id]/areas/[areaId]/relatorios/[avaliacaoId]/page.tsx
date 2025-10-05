@@ -56,7 +56,7 @@ export default function RelatorioDetalhadoPage() {
   const loadAvaliacaoDetalhada = async () => {
     try {
       const response = await api.get(`/avaliacoes/${avaliacaoId}`);
-      const data = response.data;
+      const data = response.data?.data || response.data;
 
       console.log('Dados da API:', data);
       console.log('Ponto_localizada:', data.Ponto_localizada);

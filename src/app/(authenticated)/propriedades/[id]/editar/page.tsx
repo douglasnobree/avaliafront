@@ -53,7 +53,7 @@ export default function EditarPropriedadePage() {
   const loadPropertyData = async () => {
     try {
       const response = await api.get(`/property/${propertyId}`);
-      const data = response.data;
+      const data = response.data?.data || response.data;
       
       reset({
         nome: data.nome,

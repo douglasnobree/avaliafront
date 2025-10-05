@@ -16,4 +16,5 @@ export interface GridPoint {
 export interface MeasurementGridProps {
   onGridChange: (grid: GridPoint[]) => void;
   initialGrid?: GridPoint[];
+  readOnly?: boolean;
 }

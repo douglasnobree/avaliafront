@@ -32,7 +32,7 @@ export default function EditarAreaPage() {
   const loadAreaData = async () => {
     try {
       const response = await api.get(`/areas/${areaId}`);
-      const data = response.data;
+      const data = response.data?.data || response.data;
       
       console.log('Dados da área:', data);
 

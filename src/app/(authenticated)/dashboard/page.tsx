@@ -52,7 +52,8 @@ export default function DashboardPage() {
     try {
       // Buscar apenas as propriedades do usuário logado
       const propriedadesResponse = await api.get('/property/my-properties');
-      const propriedades = propriedadesResponse.data;
+      const propriedadesData = propriedadesResponse.data?.data || propriedadesResponse.data || [];
+      const propriedades = Array.isArray(propriedadesData) ? propriedadesData : [];
 
       // Buscar todas as avaliações de todas as áreas
       let todasAvaliacoes: any[] = [];
@@ -60,12 +61,14 @@ export default function DashboardPage() {
       for (const propriedade of propriedades) {
         try {
           const areasResponse = await api.get(`/areas/property/${propriedade.id}`);
-          const areas = areasResponse.data;
+          const areasData = areasResponse.data?.data || areasResponse.data || [];
+          const areas = Array.isArray(areasData) ? areasData : [];
           
           for (const area of areas) {
             try {
               const avaliacoesResponse = await api.get(`/avaliacoes/area/${area.id}`);
-              const avaliacoes = avaliacoesResponse.data.map((av: any) => ({
+              const avaliacoesData = avaliacoesResponse.data?.data || avaliacoesResponse.data || [];
+              const avaliacoes = (Array.isArray(avaliacoesData) ? avaliacoesData : []).map((av: any) => ({
                 ...av,
                 unidade: {
                   id: area.id,
@@ -111,14 +114,14 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className='max-w-4xl mx-auto space-y-6'>
+    <div className='max-w-4xl mx-auto space-y-4 md:space-y-6 px-4 md:px-0'>
       {/* Welcome Card */}
       <Card>
-        <CardHeader>
-          <div className='flex items-center justify-between'>
-            <div className='flex items-center gap-4'>
+        <CardHeader className='p-4 md:p-6'>
+          <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4'>
+            <div className='flex items-center gap-3 md:gap-4'>
               {session?.user?.image ? (
-                <div className='relative w-16 h-16 rounded-full overflow-hidden'>
+                <div className='relative w-12 h-12 md:w-16 md:h-16 rounded-full overflow-hidden flex-shrink-0'>
                   <Image
                     src={session.user.image}
                     alt={session.user.name || 'User'}
@@ -127,25 +130,25 @@ export default function DashboardPage() {
                   />
                 </div>
               ) : (
-                <div className='w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center'>
-                  <User className='w-8 h-8 text-primary' />
+                <div className='w-12 h-12 md:w-16 md:h-16 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0'>
+                  <User className='w-6 h-6 md:w-8 md:h-8 text-primary' />
                 </div>
               )}
-              <div>
-                <CardTitle className='text-2xl'>
+              <div className='min-w-0 flex-1'>
+                <CardTitle className='text-lg md:text-2xl truncate'>
                   Bem-vindo, {session?.user?.name}!
                 </CardTitle>
-                <CardDescription>{session?.user?.email}</CardDescription>
+                <CardDescription className='text-xs md:text-sm truncate'>{session?.user?.email}</CardDescription>
                 {organization && (
-                  <p className='text-sm text-muted-foreground mt-1'>
+                  <p className='text-xs md:text-sm text-muted-foreground mt-1 truncate'>
                     Organização:{' '}
                     <span className='font-medium'>{organization.name}</span>
                   </p>
                 )}
               </div>
             </div>
-            <Link href='/criar-propriedade'>
-              <Button>
+            <Link href='/criar-propriedade' className='w-full md:w-auto'>
+              <Button className='w-full md:w-auto'>
                 <Plus className='w-4 h-4 mr-2' />
                 Nova Propriedade
               </Button>
@@ -166,19 +169,19 @@ export default function DashboardPage() {
         </div>
       ) : (
         <>
-          <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4'>
             <Card>
-              <CardHeader>
+              <CardHeader className='p-4 md:p-6'>
                 <div className='flex items-center justify-between'>
-                  <CardTitle className='text-lg'>Propriedades</CardTitle>
-                  <MapPin className='w-5 h-5 text-primary' />
+                  <CardTitle className='text-base md:text-lg'>Propriedades</CardTitle>
+                  <MapPin className='w-4 h-4 md:w-5 md:h-5 text-primary' />
                 </div>
               </CardHeader>
-              <CardContent>
-                <p className='text-3xl font-bold text-primary'>
+              <CardContent className='p-4 pt-0 md:p-6 md:pt-0'>
+                <p className='text-2xl md:text-3xl font-bold text-primary'>
                   {stats?.totalPropriedades || 0}
                 </p>
-                <p className='text-sm text-muted-foreground'>
+                <p className='text-xs md:text-sm text-muted-foreground'>
                   {stats?.totalPropriedades === 0
                     ? 'Nenhuma propriedade ainda'
                     : stats?.totalPropriedades === 1
@@ -189,17 +192,17 @@ export default function DashboardPage() {
             </Card>
 
             <Card>
-              <CardHeader>
+              <CardHeader className='p-4 md:p-6'>
                 <div className='flex items-center justify-between'>
-                  <CardTitle className='text-lg'>Avaliações</CardTitle>
-                  <BarChart3 className='w-5 h-5 text-primary' />
+                  <CardTitle className='text-base md:text-lg'>Avaliações</CardTitle>
+                  <BarChart3 className='w-4 h-4 md:w-5 md:h-5 text-primary' />
                 </div>
               </CardHeader>
-              <CardContent>
-                <p className='text-3xl font-bold text-primary'>
+              <CardContent className='p-4 pt-0 md:p-6 md:pt-0'>
+                <p className='text-2xl md:text-3xl font-bold text-primary'>
                   {stats?.totalAvaliacoes || 0}
                 </p>
-                <p className='text-sm text-muted-foreground'>
+                <p className='text-xs md:text-sm text-muted-foreground'>
                   {stats?.totalAvaliacoes === 0
                     ? 'Nenhuma avaliação realizada'
                     : stats?.totalAvaliacoes === 1
@@ -209,16 +212,16 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
+            <Card className='sm:col-span-2 lg:col-span-1'>
+              <CardHeader className='p-4 md:p-6'>
                 <div className='flex items-center justify-between'>
-                  <CardTitle className='text-lg'>Notificações</CardTitle>
-                  <Bell className='w-5 h-5 text-primary' />
+                  <CardTitle className='text-base md:text-lg'>Notificações</CardTitle>
+                  <Bell className='w-4 h-4 md:w-5 md:h-5 text-primary' />
                 </div>
               </CardHeader>
-              <CardContent>
-                <p className='text-3xl font-bold text-primary'>1</p>
-                <p className='text-sm text-muted-foreground'>
+              <CardContent className='p-4 pt-0 md:p-6 md:pt-0'>
+                <p className='text-2xl md:text-3xl font-bold text-primary'>1</p>
+                <p className='text-xs md:text-sm text-muted-foreground'>
                   1 notificação nova
                 </p>
               </CardContent>
@@ -227,13 +230,13 @@ export default function DashboardPage() {
 
           {/* Notificações de Boas-vindas */}
           <Card className='border-l-4 border-l-primary'>
-            <CardHeader>
+            <CardHeader className='p-4 md:p-6'>
               <div className='flex items-center gap-3'>
-                <div className='w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center'>
-                  <Bell className='w-5 h-5 text-primary' />
+                <div className='w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0'>
+                  <Bell className='w-4 h-4 md:w-5 md:h-5 text-primary' />
                 </div>
-                <div>
-                  <CardTitle className='text-base'>Bem-vindo ao AVAlia!</CardTitle>
+                <div className='min-w-0 flex-1'>
+                  <CardTitle className='text-sm md:text-base'>Bem-vindo ao AVAlia!</CardTitle>
                   <CardDescription className='text-xs'>
                     {new Date().toLocaleDateString('pt-BR', {
                       day: '2-digit',
@@ -244,8 +247,8 @@ export default function DashboardPage() {
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
-              <p className='text-sm text-muted-foreground'>
+            <CardContent className='p-4 pt-0 md:p-6 md:pt-0'>
+              <p className='text-xs md:text-sm text-muted-foreground'>
                 🎉 Sua conta foi criada com sucesso! Comece criando propriedades e
                 realizando avaliações de irrigação para monitorar a eficiência do seu
                 sistema.
@@ -255,13 +258,13 @@ export default function DashboardPage() {
 
           {/* Recent Activity */}
           <Card>
-            <CardHeader>
-              <CardTitle>Atividade Recente</CardTitle>
-              <CardDescription>
+            <CardHeader className='p-4 md:p-6'>
+              <CardTitle className='text-base md:text-lg'>Atividade Recente</CardTitle>
+              <CardDescription className='text-xs md:text-sm'>
                 Suas últimas ações no sistema
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className='p-4 pt-0 md:p-6 md:pt-0'>
               {!stats?.avaliacoesRecentes?.length &&
               !stats?.propriedadesRecentes?.length ? (
                 <div className='flex flex-col items-center justify-center py-12 text-muted-foreground'>

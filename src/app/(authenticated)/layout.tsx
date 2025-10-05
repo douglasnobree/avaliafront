@@ -55,10 +55,11 @@ export default function AuthenticatedLayout({
           // 2. Verifica se tem propriedades
           try {
             const propertiesResponse = await api.get('/property/my-properties');
-            const properties = propertiesResponse.data;
+            const propertiesData = propertiesResponse.data?.data || propertiesResponse.data || [];
+            const properties = Array.isArray(propertiesData) ? propertiesData : [];
 
             // Se não tem nenhuma propriedade, redireciona para criar
-            if (!properties || properties.length === 0) {
+            if (properties.length === 0) {
               router.push('/criar-propriedade');
               return;
             }
@@ -97,7 +98,7 @@ export default function AuthenticatedLayout({
   return (
     <div className='min-h-screen bg-background'>
       <Header />
-      <main className='container mx-auto px-4 py-8'>{children}</main>
+      <main className='container mx-auto px-4 sm:px-6 py-4 sm:py-6 md:py-8'>{children}</main>
     </div>
   );
 }
