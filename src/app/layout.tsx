@@ -92,7 +92,8 @@ export default function RootLayout({
   return (
     <html lang='pt-BR'>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning>
         <QueryProvider>{children}</QueryProvider>
       </body>
     </html>

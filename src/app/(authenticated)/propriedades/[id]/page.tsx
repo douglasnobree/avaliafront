@@ -39,7 +39,7 @@ interface Property {
 
 interface Area {
   id: string;
-  identificacao: string;
+  indentificacao: string; // Mantém o typo do banco de dados
   area_ha: number;
   propriedade_id: string;
   ultimaAvaliacao?: {
@@ -71,7 +71,7 @@ export default function PropertyDetailPage() {
 
       // Carrega áreas (unidades avaliadas) da propriedade
       const areasResponse = await api.get(
-        `/hydraulic-sector/property/${propertyId}/areas`
+        `/areas/property/${propertyId}`
       );
       setAreas(areasResponse.data);
     } catch (error: any) {
@@ -265,7 +265,7 @@ export default function PropertyDetailPage() {
                   }>
                   <CardHeader>
                     <CardTitle className='text-lg'>
-                      {area.identificacao}
+                      {area.indentificacao}
                     </CardTitle>
                     <CardDescription>{area.area_ha} ha</CardDescription>
                   </CardHeader>

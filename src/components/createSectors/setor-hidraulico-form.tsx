@@ -65,7 +65,7 @@ export function SetorHidraulicoForm({
                   </Select>
                 )}
               />
-              {errors.emissor_type && (
+              {'emissor_type' in errors && errors.emissor_type && (
                 <p className='text-sm text-red-500'>
                   {errors.emissor_type.message}
                 </p>
@@ -80,7 +80,7 @@ export function SetorHidraulicoForm({
                 placeholder='Ex: Netafim, Naandanjain'
                 {...register('fabricante')}
               />
-              {errors.fabricante && (
+              {'fabricante' in errors && errors.fabricante && (
                 <p className='text-sm text-red-500'>
                   {errors.fabricante.message}
                 </p>
@@ -95,7 +95,7 @@ export function SetorHidraulicoForm({
                 placeholder='Ex: UniRam'
                 {...register('modelo')}
               />
-              {errors.modelo && (
+              {'modelo' in errors && errors.modelo && (
                 <p className='text-sm text-red-500'>{errors.modelo.message}</p>
               )}
             </div>
@@ -109,24 +109,9 @@ export function SetorHidraulicoForm({
                 placeholder='Ex: 2.5'
                 {...register('vazao_nominal')}
               />
-              {errors.vazao_nominal && (
+              {'vazao_nominal' in errors && errors.vazao_nominal && (
                 <p className='text-sm text-red-500'>
                   {errors.vazao_nominal.message}
-                </p>
-              )}
-            </div>
-
-            <div className='space-y-2'>
-              <Label htmlFor='num_emissores'>Número de Emissores *</Label>
-              <Input
-                id='num_emissores'
-                type='number'
-                placeholder='Ex: 1000'
-                {...register('num_emissores')}
-              />
-              {errors.num_emissores && (
-                <p className='text-sm text-red-500'>
-                  {errors.num_emissores.message}
                 </p>
               )}
             </div>
@@ -151,45 +136,9 @@ export function SetorHidraulicoForm({
                 placeholder='Ex: 10'
                 {...register('pressao_trabalho')}
               />
-              {errors.pressao_trabalho && (
+              {'pressao_trabalho' in errors && errors.pressao_trabalho && (
                 <p className='text-sm text-red-500'>
                   {errors.pressao_trabalho.message}
-                </p>
-              )}
-            </div>
-
-            <div className='space-y-2'>
-              <Label htmlFor='pressao_recomendada'>
-                Pressão Recomendada (mca) *
-              </Label>
-              <Input
-                id='pressao_recomendada'
-                type='number'
-                step='0.01'
-                placeholder='Ex: 12'
-                {...register('pressao_recomendada')}
-              />
-              {errors.pressao_recomendada && (
-                <p className='text-sm text-red-500'>
-                  {errors.pressao_recomendada.message}
-                </p>
-              )}
-            </div>
-
-            <div className='space-y-2'>
-              <Label htmlFor='pressao_entrada'>
-                Pressão de Entrada (mca) *
-              </Label>
-              <Input
-                id='pressao_entrada'
-                type='number'
-                step='0.01'
-                placeholder='Ex: 15'
-                {...register('pressao_entrada')}
-              />
-              {errors.pressao_entrada && (
-                <p className='text-sm text-red-500'>
-                  {errors.pressao_entrada.message}
                 </p>
               )}
             </div>
@@ -205,7 +154,7 @@ export function SetorHidraulicoForm({
                 placeholder='Ex: 0.5'
                 {...register('dist_emissores')}
               />
-              {errors.dist_emissores && (
+              {'dist_emissores' in errors && errors.dist_emissores && (
                 <p className='text-sm text-red-500'>
                   {errors.dist_emissores.message}
                 </p>
@@ -223,7 +172,7 @@ export function SetorHidraulicoForm({
                 placeholder='Ex: 1.5'
                 {...register('dist_laterais')}
               />
-              {errors.dist_laterais && (
+              {'dist_laterais' in errors && errors.dist_laterais && (
                 <p className='text-sm text-red-500'>
                   {errors.dist_laterais.message}
                 </p>
@@ -247,7 +196,7 @@ export function SetorHidraulicoForm({
                 placeholder='Ex: Tela, Disco, Areia'
                 {...register('filtro_tipo')}
               />
-              {errors.filtro_tipo && (
+              {'filtro_tipo' in errors && errors.filtro_tipo && (
                 <p className='text-sm text-red-500'>
                   {errors.filtro_tipo.message}
                 </p>
@@ -262,7 +211,7 @@ export function SetorHidraulicoForm({
                 placeholder='Ex: 130 mesh, 120 micras'
                 {...register('malha_filtro')}
               />
-              {errors.malha_filtro && (
+              {'malha_filtro' in errors && errors.malha_filtro && (
                 <p className='text-sm text-red-500'>
                   {errors.malha_filtro.message}
                 </p>
@@ -279,7 +228,7 @@ export function SetorHidraulicoForm({
                 placeholder='Ex: Manual, Elétrica, Hidráulica'
                 {...register('valvula_tipo')}
               />
-              {errors.valvula_tipo && (
+              {'valvula_tipo' in errors && errors.valvula_tipo && (
                 <p className='text-sm text-red-500'>
                   {errors.valvula_tipo.message}
                 </p>
@@ -294,7 +243,7 @@ export function SetorHidraulicoForm({
                 placeholder='Ex: Elétrica, Fotovoltaica, Combustível'
                 {...register('energia_tipo')}
               />
-              {errors.energia_tipo && (
+              {'energia_tipo' in errors && errors.energia_tipo && (
                 <p className='text-sm text-red-500'>
                   {errors.energia_tipo.message}
                 </p>

@@ -173,7 +173,7 @@ export default function AreaDetailPage() {
         onConfirm={handleDeleteArea}
         title="Excluir Área"
         description="Tem certeza que deseja excluir esta área? Esta ação é irreversível e todos os dados de avaliações associados serão perdidos permanentemente."
-        itemName={area.indentificacao}
+        itemName={area.identificacao}
       />
 
       {/* Última Avaliação (se existir) */}

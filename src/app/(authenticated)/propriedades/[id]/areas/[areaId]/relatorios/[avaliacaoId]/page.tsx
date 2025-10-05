@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { Loader2, ArrowLeft, TrendingUp, TrendingDown, BarChart3, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DeleteConfirmationDialog } from '@/components/ui/delete-confirmation-dialog';
-import { MeasurementGrid } from '@/components/ui/measurement-grid';
+import { MeasurementGrid } from '@/components/measurement-grid';
 import {
   Card,
   CardContent,
@@ -340,16 +340,47 @@ export default function RelatorioDetalhadoPage() {
 
       {/* Grid Visual dos Pontos Medidos */}
       <MeasurementGrid
-        numLinhas={4}
-        numEmissores={4}
         onGridChange={() => {}}
-        initialGrid={
-          avaliacao.pontos?.map((ponto: any, index: number) => ({
-            linha: Math.floor(index / 4) + 1,
-            emissor: (index % 4) + 1,
-            medido: true,
-          })) || []
-        }
+        initialGrid={(() => {
+          if (!avaliacao.pontos || avaliacao.pontos.length === 0) return [];
+          
+          // Agrupar pontos por linha e emissor
+          const groupedPoints = new Map<string, any[]>();
+          
+          avaliacao.pontos.forEach((ponto: any) => {
+            const linha = ponto.eixo_y + 1;
+            const emissor = ponto.eixo_x + 1;
+            const key = `${linha}-${emissor}`;
+            
+            if (!groupedPoints.has(key)) {
+              groupedPoints.set(key, []);
+            }
+            
+            groupedPoints.get(key)!.push({
+              id: crypto.randomUUID(),
+              volume: ponto.volume_ml,
+              tempo: ponto.tempo_seg,
+              vazao: ponto.vazao_l_h,
+            });
+          });
+          
+          // Converter para formato GridPoint
+          const gridPoints: any[] = [];
+          groupedPoints.forEach((repeticoes, key) => {
+            const [linha, emissor] = key.split('-').map(Number);
+            const mediaVazao = repeticoes.reduce((sum, r) => sum + r.vazao, 0) / repeticoes.length;
+            
+            gridPoints.push({
+              linha,
+              emissor,
+              medido: true,
+              repeticoes,
+              mediaVazao,
+            });
+          });
+          
+          return gridPoints;
+        })()}
       />
 
       {/* Gráfico 3D de Vazão */}

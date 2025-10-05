@@ -2,13 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { toast } from 'sonner';
-import { Loader2, Plus, Trash2, Save } from 'lucide-react';
+import { Loader2, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -18,19 +17,11 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { MeasurementGrid } from '@/components/ui/measurement-grid';
+import { MeasurementGrid } from '@/components/measurement-grid';
 import api from '@/lib/api';
 import { useSession } from '@/lib/auth-client';
 
-const medicaoSchema = z.object({
-  sequencia: z.number(),
-  volume: z.string().min(1, 'Volume é obrigatório'),
-  tempo: z.string().min(1, 'Tempo é obrigatório'),
-  vazao: z.string().optional(),
-});
-
 const novaAvaliacaoSchema = z.object({
-  medicoes: z.array(medicaoSchema).min(1, 'Adicione pelo menos uma medição'),
   comentarios: z.string().optional(),
   recomendacoes: z.string().optional(),
 });
@@ -50,25 +41,13 @@ export default function NovaAvaliacaoPage() {
   const {
     register,
     handleSubmit,
-    control,
-    watch,
-    setValue,
     formState: { errors },
   } = useForm<NovaAvaliacaoFormData>({
     resolver: zodResolver(novaAvaliacaoSchema),
     defaultValues: {
-      medicoes: [
-        { sequencia: 1, volume: '', tempo: '', vazao: '' },
-        { sequencia: 2, volume: '', tempo: '', vazao: '' },
-        { sequencia: 3, volume: '', tempo: '', vazao: '' },
-        { sequencia: 4, volume: '', tempo: '', vazao: '' },
-      ],
+      comentarios: '',
+      recomendacoes: '',
     },
-  });
-
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: 'medicoes',
   });
 
   // Buscar informações da área
@@ -88,38 +67,33 @@ export default function NovaAvaliacaoPage() {
     }
   }, [areaId]);
 
-  // Calcular vazão automaticamente
-  const calcularVazao = (index: number) => {
-    const medicoes = watch('medicoes');
-    const medicao = medicoes[index];
-    
-    if (medicao?.volume && medicao?.tempo) {
-      const volume = parseFloat(medicao.volume); // Volume em mL
-      const tempo = parseFloat(medicao.tempo);   // Tempo em segundos
-      
-      if (volume > 0 && tempo > 0) {
-        // Vazão em L/h = (Volume em mL / Tempo em seg) * 3.6
-        // Convertendo: mL/s → L/h = (mL/s) * (1L/1000mL) * (3600s/1h) = mL/s * 3.6
-        const vazao = (volume / tempo) * 3.6;
-        setValue(`medicoes.${index}.vazao`, vazao.toFixed(2));
-      }
-    }
-  };
-
   const onSubmit = async (data: NovaAvaliacaoFormData) => {
     if (!session?.user?.id) {
       toast.error('Usuário não autenticado');
       return;
     }
 
+    // Validar que todos os pontos foram medidos
+    const pontosMedidos = gridPoints.filter(p => p.medido);
+    if (pontosMedidos.length === 0) {
+      toast.error('Marque e meça pelo menos um ponto no grid');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      // Calcular CUD e CUC (simplificado - em produção use cálculos reais)
-      const vazoes = data.medicoes
-        .map((m) => parseFloat(m.vazao || '0'))
-        .filter((v) => v > 0);
+      // Usar médias das vazões de cada ponto
+      const vazoes = pontosMedidos
+        .filter(p => p.mediaVazao && p.mediaVazao > 0)
+        .map(p => p.mediaVazao!);
       
+      if (vazoes.length === 0) {
+        toast.error('Nenhuma vazão válida foi medida');
+        setLoading(false);
+        return;
+      }
+
       const vazaoMedia = vazoes.reduce((a, b) => a + b, 0) / vazoes.length;
       
       // CUC simplificado
@@ -134,14 +108,34 @@ export default function NovaAvaliacaoPage() {
         vazoesSorted.slice(0, n25).reduce((a, b) => a + b, 0) / n25;
       const cud = (media25Menores / vazaoMedia) * 100;
 
-      const totalVolume = data.medicoes.reduce(
-        (sum, m) => sum + parseFloat(m.volume),
+      // Calcular total de volume e tempo somando todas as repetições
+      const totalVolume = pontosMedidos.reduce(
+        (sum, p) => sum + p.repeticoes.reduce((s: number, r: any) => s + r.volume, 0),
         0
       );
-      const totalTempo = data.medicoes.reduce(
-        (sum, m) => sum + parseFloat(m.tempo),
+      const totalTempo = pontosMedidos.reduce(
+        (sum, p) => sum + p.repeticoes.reduce((s: number, r: any) => s + r.tempo, 0),
         0
       );
+
+      // Criar um ponto de avaliação para cada repetição
+      const pontos: any[] = [];
+      let sequencia = 1;
+      
+      pontosMedidos.forEach((p) => {
+        p.repeticoes.forEach((rep: any) => {
+          pontos.push({
+            sequencia: sequencia++,
+            eixo_x: p.emissor - 1,
+            eixo_y: p.linha - 1,
+            distancia: (p.emissor - 1) * 10,
+            diametro_coletor: 100,
+            volume_ml: rep.volume,
+            tempo_seg: rep.tempo,
+            vazao_l_h: rep.vazao,
+          });
+        });
+      });
 
       const avaliacaoData = {
         unidade_id: areaId,
@@ -152,17 +146,7 @@ export default function NovaAvaliacaoPage() {
         cuc: Math.min(100, Math.max(0, cuc)),
         offline_status: false,
         unidade_type: 'SETOR_HIDRAULICO',
-        // setor_id e pivo_id não são enviados - eles referenciam equipamentos específicos
-        pontos: data.medicoes.map((m, index) => ({
-          sequencia: m.sequencia,
-          eixo_x: index % 5,
-          eixo_y: Math.floor(index / 5),
-          distancia: index * 10, // Distância estimada
-          diametro_coletor: 100, // Valor padrão já que não é solicitado para setor localizado
-          volume_ml: parseFloat(m.volume), // Já está em mL
-          tempo_seg: parseFloat(m.tempo), // Já está em segundos
-          vazao_l_h: parseFloat(m.vazao || '0'),
-        })),
+        pontos: pontos,
         comentarios: data.comentarios || undefined,
         recomendacoes: data.recomendacoes || undefined,
       };
@@ -214,127 +198,8 @@ export default function NovaAvaliacaoPage() {
 
         {/* Grid Visual de Pontos de Medição */}
         <MeasurementGrid
-          numLinhas={4}
-          numEmissores={4}
           onGridChange={setGridPoints}
         />
-
-        {/* Medições */}
-        <Card>
-          <CardHeader>
-            <div className='flex items-center justify-between'>
-              <div>
-                <CardTitle>Medições por Linha de Irrigação</CardTitle>
-                <CardDescription>
-                  Adicione as medições de volume, tempo e vazão para cada ponto marcado no mapa
-                </CardDescription>
-              </div>
-              <Button
-                type='button'
-                variant='outline'
-                size='sm'
-                onClick={() => append({ 
-                  sequencia: fields.length + 1, 
-                  volume: '', 
-                  tempo: '', 
-                  vazao: '' 
-                })}>
-                <Plus className='w-4 h-4 mr-2' />
-                Adicionar Linha
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className='space-y-4'>
-              {fields.map((field, index) => (
-                <Card key={field.id} className='bg-secondary/20'>
-                  <CardContent className='pt-6'>
-                    <div className='flex items-center justify-between mb-4'>
-                      <h3 className='text-lg font-semibold text-green-600'>
-                        Linha {index + 1} - Emissor {index + 1}
-                      </h3>
-                    </div>
-                    <div className='flex items-start gap-4'>
-                      <div className='flex-1 space-y-4'>
-                        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-                          <div className='space-y-2'>
-                            <Label htmlFor={`medicoes.${index}.volume`}>
-                              Volume (mL) *
-                            </Label>
-                            <Input
-                              id={`medicoes.${index}.volume`}
-                              type='number'
-                              step='1'
-                              placeholder='Ex: 150'
-                              {...register(`medicoes.${index}.volume`)}
-                              onBlur={() => calcularVazao(index)}
-                            />
-                            {errors.medicoes?.[index]?.volume && (
-                              <p className='text-sm text-red-500'>
-                                {errors.medicoes[index]?.volume?.message}
-                              </p>
-                            )}
-                          </div>
-
-                          <div className='space-y-2'>
-                            <Label htmlFor={`medicoes.${index}.tempo`}>
-                              Tempo (seg) *
-                            </Label>
-                            <Input
-                              id={`medicoes.${index}.tempo`}
-                              type='number'
-                              step='1'
-                              placeholder='Ex: 60'
-                              {...register(`medicoes.${index}.tempo`)}
-                              onBlur={() => calcularVazao(index)}
-                            />
-                            {errors.medicoes?.[index]?.tempo && (
-                              <p className='text-sm text-red-500'>
-                                {errors.medicoes[index]?.tempo?.message}
-                              </p>
-                            )}
-                          </div>
-
-                          <div className='space-y-2'>
-                            <Label htmlFor={`medicoes.${index}.vazao`}>
-                              Vazão (L/h)
-                            </Label>
-                            <Input
-                              id={`medicoes.${index}.vazao`}
-                              type='number'
-                              step='0.01'
-                              placeholder='Calculado'
-                              {...register(`medicoes.${index}.vazao`)}
-                              readOnly
-                              className='bg-muted'
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      {fields.length > 1 && (
-                        <Button
-                          type='button'
-                          variant='destructive'
-                          size='icon'
-                          onClick={() => remove(index)}
-                          className='mt-8'>
-                          <Trash2 className='w-4 h-4' />
-                        </Button>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-
-              {errors.medicoes?.root && (
-                <p className='text-sm text-red-500'>
-                  {errors.medicoes.root.message}
-                </p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Comentários e Recomendações */}
         <Card>
