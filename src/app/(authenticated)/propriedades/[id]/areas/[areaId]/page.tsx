@@ -24,49 +24,12 @@ import {
 } from '@/components/ui/card';
 import api from '@/lib/api';
 import Link from 'next/link';
+import { SetorHidraulico } from '@/types/setor-hidraulico';
+import { PivoCentral } from '@/types/pivo-central';
+import { Avaliacao } from '@/types/avaliacao';
 
-interface SetorHidraulico {
-  id: string;
-  identificacao: string;
-  fabricante: string;
-  modelo: string;
-  vazao_nominal: number;
-  pressao_trabalho: number;
-  dist_emissores: number;
-  dist_laterais: number;
-  filtro_tipo: string;
-  malha_filtro: string;
-  valvula_tipo: string;
-  energia_tipo: string;
-  condicoes_gerais: string;
-  freq_manutencao: string;
-  data_ultima_manutencao: string;
-  emissor_type: string;
-  tipo_setor: string;
-  propriedadeId: string;
-  userId: string;
-}
 
-interface PivoCentral {
-  id: string;
-  identificacao: string;
-  // TODO: Adicionar propriedades específicas do pivô central quando disponíveis
-  propriedadeId: string;
-  userId: string;
-}
-
-// Union type para representar qualquer tipo de área
 type Area = SetorHidraulico | PivoCentral;
-
-interface Avaliacao {
-  id: string;
-  data: string;
-  area_irrigada: number;
-  volume_agua: number;
-  tempo_irrigacao: number;
-  cud: number;
-  cuc: number;
-}
 
 export default function AreaDetailPage() {
   const params = useParams();
@@ -245,7 +208,7 @@ export default function AreaDetailPage() {
             Voltar
           </Button>
           <Link
-            href={`/propriedades/${propertyId}/areas/${areaId}/nova-avaliacao`}>
+            href={`/propriedades/${propertyId}/areas/${areaId}/nova-avaliacao?tipo=${tipoArea}`}>
             <Button>
               <Plus className='w-4 h-4 mr-2' />
               Nova Avaliação
@@ -489,7 +452,7 @@ export default function AreaDetailPage() {
               </CardDescription>
             </div>
             <Link
-              href={`/propriedades/${propertyId}/areas/${areaId}/nova-avaliacao`}>
+              href={`/propriedades/${propertyId}/areas/${areaId}/nova-avaliacao?tipo=${tipoArea}`}>
               <Button>
                 <Plus className='w-4 h-4 mr-2' />
                 Nova Avaliação
@@ -508,7 +471,7 @@ export default function AreaDetailPage() {
                 Comece realizando a primeira avaliação desta área
               </p>
               <Link
-                href={`/propriedades/${propertyId}/areas/${areaId}/nova-avaliacao`}>
+                href={`/propriedades/${propertyId}/areas/${areaId}/nova-avaliacao?tipo=${tipoArea}`}>
                 <Button>
                   <Plus className='w-4 h-4 mr-2' />
                   Fazer Primeira Avaliação
