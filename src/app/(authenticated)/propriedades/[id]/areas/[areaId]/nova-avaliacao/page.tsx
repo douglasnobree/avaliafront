@@ -178,7 +178,7 @@ export default function NovaAvaliacaoPage() {
       });
 
       const avaliacaoData = {
-        unidade_id: areaId,
+        area_id: areaId,
         area_irrigada: 0, // TODO: Implementar campo area_irrigada nas interfaces quando disponível
         volume_agua: totalVolume,
         tempo_irrigacao: totalTempo,
@@ -190,6 +190,8 @@ export default function NovaAvaliacaoPage() {
         pontos: pontos,
         comentarios: data.comentarios || undefined,
         recomendacoes: data.recomendacoes || undefined,
+        setor_id: tipoArea === 'setor_hidraulico' ? areaId : null,
+        pivo_id: tipoArea === 'pivo_central' ? areaId : null,
       };
 
       await api.post('/avaliacoes', avaliacaoData);
