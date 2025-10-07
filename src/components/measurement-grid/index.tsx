@@ -50,7 +50,7 @@ export function MeasurementGrid({ onGridChange, initialGrid = [], readOnly = fal
       <CardHeader className="p-4 md:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="min-w-0 flex-1">
-            <CardTitle className="text-base md:text-lg">Marcação de Pontos</CardTitle>
+            <CardTitle className="text-base md:text-lg">Coleta de dados</CardTitle>
             <CardDescription className="text-xs md:text-sm mt-1">
               Clique nas bolinhas para fazer a avaliação de cada ponto
             </CardDescription>

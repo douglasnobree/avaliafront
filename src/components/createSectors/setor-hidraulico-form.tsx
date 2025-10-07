@@ -88,7 +88,7 @@ export function SetorHidraulicoForm({
             </div>
 
             <div className='space-y-2'>
-              <Label htmlFor='modelo'>Modelo do Emissor *</Label>
+              <Label htmlFor='modelo'>Modelo do Emissor (opcional)</Label>
               <Input
                 id='modelo'
                 type='text'

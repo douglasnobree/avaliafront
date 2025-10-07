@@ -6,10 +6,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { toast } from 'sonner';
-import { Loader2, Save } from 'lucide-react';
+import { Loader2, Save, Upload, X, ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import {
   Card,
   CardContent,
@@ -32,6 +33,8 @@ export default function NovaAvaliacaoPage() {
   const [loading, setLoading] = useState(false);
   const [areaInfo, setAreaInfo] = useState<any>(null);
   const [gridPoints, setGridPoints] = useState<any[]>([]);
+  const [fotos, setFotos] = useState<File[]>([]);
+  const [fotoPreviews, setFotoPreviews] = useState<string[]>([]);
   const router = useRouter();
   const params = useParams();
   const propertyId = params?.id as string;
@@ -67,6 +70,46 @@ export default function NovaAvaliacaoPage() {
       fetchAreaInfo();
     }
   }, [areaId]);
+
+  // Funções para manipular fotos
+  const handleFotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    const newFiles = Array.from(files);
+    const validFiles = newFiles.filter(file => {
+      // Validar tipo de arquivo
+      if (!file.type.startsWith('image/')) {
+        toast.error(`${file.name} não é uma imagem válida`);
+        return false;
+      }
+      // Validar tamanho (máx 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error(`${file.name} é muito grande (máx 5MB)`);
+        return false;
+      }
+      return true;
+    });
+
+    if (validFiles.length === 0) return;
+
+    // Adicionar arquivos
+    setFotos(prev => [...prev, ...validFiles]);
+
+    // Criar previews
+    validFiles.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFotoPreviews(prev => [...prev, reader.result as string]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleRemoverFoto = (index: number) => {
+    setFotos(prev => prev.filter((_, i) => i !== index));
+    setFotoPreviews(prev => prev.filter((_, i) => i !== index));
+  };
 
   const onSubmit = async (data: NovaAvaliacaoFormData) => {
     if (!session?.user?.id) {
@@ -152,7 +195,18 @@ export default function NovaAvaliacaoPage() {
         recomendacoes: data.recomendacoes || undefined,
       };
 
-      await api.post('/avaliacoes', avaliacaoData);
+      const response = await api.post('/avaliacoes', avaliacaoData);
+
+      // Se houver fotos, fazer upload (futura implementação com endpoint específico)
+      if (fotos.length > 0) {
+        toast.info(`${fotos.length} foto(s) anexada(s) à avaliação`);
+        // TODO: Implementar upload de fotos para o backend
+        // const formData = new FormData();
+        // fotos.forEach((foto, index) => {
+        //   formData.append(`fotos`, foto);
+        // });
+        // await api.post(`/avaliacoes/${response.data.id}/fotos`, formData);
+      }
 
       toast.success('Avaliação criada com sucesso!');
       router.push(`/propriedades/${propertyId}/areas/${areaId}`);
@@ -210,7 +264,7 @@ export default function NovaAvaliacaoPage() {
               Adicione observações profissionais para o proprietário
             </CardDescription>
           </CardHeader>
-          <CardContent className='space-y-4'>
+          <CardContent className='space-y-6'>
             <div className='space-y-2'>
               <Label htmlFor='comentarios'>Comentários</Label>
               <Textarea
@@ -231,6 +285,74 @@ export default function NovaAvaliacaoPage() {
                 rows={4}
                 {...register('recomendacoes')}
               />
+            </div>
+
+            {/* Upload de Fotos */}
+            <div className='space-y-3'>
+              <Label>Fotos da Avaliação</Label>
+              <div className='flex flex-col gap-3'>
+                <div className='flex items-center gap-2'>
+                  <Input
+                    id='foto-upload'
+                    type='file'
+                    accept='image/*'
+                    multiple
+                    onChange={handleFotoUpload}
+                    className='hidden'
+                  />
+                  <Button
+                    type='button'
+                    variant='outline'
+                    onClick={() => document.getElementById('foto-upload')?.click()}
+                    className='w-full sm:w-auto'
+                  >
+                    <Upload className='w-4 h-4 mr-2' />
+                    Adicionar Fotos
+                  </Button>
+                  <p className='text-xs text-muted-foreground'>
+                    Máx 5MB por foto
+                  </p>
+                </div>
+
+                {/* Preview das fotos */}
+                {fotoPreviews.length > 0 && (
+                  <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3'>
+                    {fotoPreviews.map((preview, index) => (
+                      <div
+                        key={index}
+                        className='relative aspect-square rounded-lg overflow-hidden border border-border bg-muted group'
+                      >
+                        <img
+                          src={preview}
+                          alt={`Foto ${index + 1}`}
+                          className='w-full h-full object-cover'
+                        />
+                        <Button
+                          type='button'
+                          variant='destructive'
+                          size='icon'
+                          className='absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity'
+                          onClick={() => handleRemoverFoto(index)}
+                        >
+                          <X className='h-3 w-3' />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {fotoPreviews.length === 0 && (
+                  <div className='flex flex-col items-center justify-center py-8 border-2 border-dashed border-border rounded-lg bg-muted/20'>
+                    <ImageIcon className='w-12 h-12 text-muted-foreground mb-2' />
+                    <p className='text-sm text-muted-foreground'>
+                      Nenhuma foto adicionada
+                    </p>
+                    <p className='text-xs text-muted-foreground mt-1'>
+                      Clique no botão acima para adicionar fotos
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
