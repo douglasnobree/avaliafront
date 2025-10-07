@@ -11,13 +11,18 @@ import api from '@/lib/api';
 import { AreaTypeSelector } from '../../../../../components/createSectors/area-type-selector';
 import { SetorHidraulicoForm } from '../../../../../components/createSectors/setor-hidraulico-form';
 import { PivoCentralForm } from '../../../../../components/createSectors/pivo-central-form';
-import { createAreaSchema, type CreateAreaFormData } from '../../../../../components/createSectors/form-schemas';
+import {
+  createAreaSchema,
+  type CreateAreaFormData,
+} from '../../../../../components/createSectors/form-schemas';
 
 export default function CreateAreaPage() {
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<'tipo' | 'dados'>('tipo');
-  const [tipoSetor, setTipoSetor] = useState<'SETOR_HIDRAULICO' | 'PIVO_CENTRAL' | null>(null);
-  
+  const [tipoSetor, setTipoSetor] = useState<
+    'SETOR_HIDRAULICO' | 'PIVO_CENTRAL' | null
+  >(null);
+
   const router = useRouter();
   const params = useParams();
   const propertyId = params?.id as string;
@@ -42,16 +47,14 @@ export default function CreateAreaPage() {
     console.log('Dados do formulário:', formData);
 
     try {
-      const payload: any = {
-        area: {
-          indentificacao: formData.identificacao,
-          area_ha: parseFloat(formData.area_ha),
-          propriedade_id: propertyId,
-        }
+      let payload: any = {
+        identificacao: formData.identificacao,
+        propriedadeId: propertyId,
       };
 
       if (formData.tipo_setor === 'SETOR_HIDRAULICO') {
-        payload.setor_hidraulico = {
+        payload = {
+          ...payload,
           fabricante: formData.fabricante || undefined,
           modelo: formData.modelo || undefined,
           vazao_nominal: parseFloat(formData.vazao_nominal),
@@ -67,9 +70,15 @@ export default function CreateAreaPage() {
           data_ultima_manutencao: formData.data_ultima_manutencao,
           emissor_type: formData.emissor_type,
           tipo_setor: 'SETOR_HIDRAULICO',
+          userId: userId,
         };
+        console.log('Payload SETOR_HIDRAULICO:', payload);
+        await api.post('/hydraulic-sector', payload);
+        toast.success('Área criada com sucesso!');
+        router.push(`/propriedades/${propertyId}`);
       } else if (formData.tipo_setor === 'PIVO_CENTRAL') {
-        payload.pivo_central = {
+        payload = {
+          ...payload,
           num_torres: parseInt(formData.num_torres),
           comprimento: parseFloat(formData.comprimento),
           fabricante: formData.fabricante || undefined,
@@ -90,14 +99,15 @@ export default function CreateAreaPage() {
           problemas_observados: formData.problemas_observados || undefined,
           data_ultima_avaliacoes: formData.data_ultima_avaliacoes,
         };
+        await api.post('/middle-pivot', payload);
+        toast.success('Área criada com sucesso!');
+        router.push(`/propriedades/${propertyId}`);
       }
 
-      console.log('Payload final sendo enviado:', JSON.stringify(payload, null, 2));
-      
-      await api.post('/areas', payload);
-
-      toast.success('Área criada com sucesso!');
-      router.push(`/propriedades/${propertyId}`);
+      console.log(
+        'Payload final sendo enviado:',
+        JSON.stringify(payload, null, 2)
+      );
     } catch (error: any) {
       console.error('Erro ao criar área:', error);
       toast.error(error?.response?.data?.message || 'Erro ao criar área');
@@ -126,8 +136,8 @@ export default function CreateAreaPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <form onSubmit={onSubmit} className="space-y-6">
+    <div className='max-w-4xl mx-auto p-6'>
+      <form onSubmit={onSubmit} className='space-y-6'>
         {tipoSetor === 'SETOR_HIDRAULICO' ? (
           <SetorHidraulicoForm
             form={form}

@@ -9,7 +9,16 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { User, Plus, Bell, MapPin, BarChart3, Calendar, CheckCircle2, Loader2 } from 'lucide-react';
+import {
+  User,
+  Plus,
+  Bell,
+  MapPin,
+  BarChart3,
+  Calendar,
+  CheckCircle2,
+  Loader2,
+} from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import api from '@/lib/api';
@@ -31,7 +40,7 @@ interface DashboardStats {
     cuc: number;
     unidade: {
       id: string;
-      indentificacao: string;
+      identificacao: string;
       propriedade_id: string;
     };
   }>;
@@ -52,42 +61,61 @@ export default function DashboardPage() {
     try {
       // Buscar apenas as propriedades do usuário logado
       const propriedadesResponse = await api.get('/property/my-properties');
-      const propriedadesData = propriedadesResponse.data?.data || propriedadesResponse.data || [];
-      const propriedades = Array.isArray(propriedadesData) ? propriedadesData : [];
+      const propriedadesData =
+        propriedadesResponse.data?.data || propriedadesResponse.data || [];
+      const propriedades = Array.isArray(propriedadesData)
+        ? propriedadesData
+        : [];
 
       // Buscar todas as avaliações de todas as áreas
       let todasAvaliacoes: any[] = [];
-      
+
       for (const propriedade of propriedades) {
         try {
-          const areasResponse = await api.get(`/areas/property/${propriedade.id}`);
-          const areasData = areasResponse.data?.data || areasResponse.data || [];
+          const areasResponse = await api.get(
+            `/areas/property/${propriedade.id}`
+          );
+          const areasData =
+            areasResponse.data?.data || areasResponse.data || [];
           const areas = Array.isArray(areasData) ? areasData : [];
-          
+
           for (const area of areas) {
             try {
-              const avaliacoesResponse = await api.get(`/avaliacoes/area/${area.id}`);
-              const avaliacoesData = avaliacoesResponse.data?.data || avaliacoesResponse.data || [];
-              const avaliacoes = (Array.isArray(avaliacoesData) ? avaliacoesData : []).map((av: any) => ({
+              const avaliacoesResponse = await api.get(
+                `/avaliacoes/area/${area.id}`
+              );
+              const avaliacoesData =
+                avaliacoesResponse.data?.data || avaliacoesResponse.data || [];
+              const avaliacoes = (
+                Array.isArray(avaliacoesData) ? avaliacoesData : []
+              ).map((av: any) => ({
                 ...av,
                 unidade: {
                   id: area.id,
-                  indentificacao: area.indentificacao,
+                  identificacao: area.identificacao,
                   propriedade_id: propriedade.id,
                 },
               }));
               todasAvaliacoes = [...todasAvaliacoes, ...avaliacoes];
             } catch (error) {
-              console.error(`Erro ao buscar avaliações da área ${area.id}:`, error);
+              console.error(
+                `Erro ao buscar avaliações da área ${area.id}:`,
+                error
+              );
             }
           }
         } catch (error) {
-          console.error(`Erro ao buscar áreas da propriedade ${propriedade.id}:`, error);
+          console.error(
+            `Erro ao buscar áreas da propriedade ${propriedade.id}:`,
+            error
+          );
         }
       }
 
       // Ordenar avaliações por data (mais recentes primeiro)
-      todasAvaliacoes.sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
+      todasAvaliacoes.sort(
+        (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()
+      );
 
       // Ordenar propriedades por data de criação
       const propriedadesComData = propriedades.map((p: any) => ({
@@ -95,8 +123,9 @@ export default function DashboardPage() {
         nome: p.nome,
         createdAt: p.createdAt || new Date().toISOString(),
       }));
-      propriedadesComData.sort((a: any, b: any) => 
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      propriedadesComData.sort(
+        (a: any, b: any) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
 
       setStats({
@@ -138,7 +167,9 @@ export default function DashboardPage() {
                 <CardTitle className='text-lg md:text-2xl truncate'>
                   Bem-vindo, {session?.user?.name}!
                 </CardTitle>
-                <CardDescription className='text-xs md:text-sm truncate'>{session?.user?.email}</CardDescription>
+                <CardDescription className='text-xs md:text-sm truncate'>
+                  {session?.user?.email}
+                </CardDescription>
                 {organization && (
                   <p className='text-xs md:text-sm text-muted-foreground mt-1 truncate'>
                     Organização:{' '}
@@ -173,7 +204,9 @@ export default function DashboardPage() {
             <Card>
               <CardHeader className='p-4 md:p-6'>
                 <div className='flex items-center justify-between'>
-                  <CardTitle className='text-base md:text-lg'>Propriedades</CardTitle>
+                  <CardTitle className='text-base md:text-lg'>
+                    Propriedades
+                  </CardTitle>
                   <MapPin className='w-4 h-4 md:w-5 md:h-5 text-primary' />
                 </div>
               </CardHeader>
@@ -194,7 +227,9 @@ export default function DashboardPage() {
             <Card>
               <CardHeader className='p-4 md:p-6'>
                 <div className='flex items-center justify-between'>
-                  <CardTitle className='text-base md:text-lg'>Avaliações</CardTitle>
+                  <CardTitle className='text-base md:text-lg'>
+                    Avaliações
+                  </CardTitle>
                   <BarChart3 className='w-4 h-4 md:w-5 md:h-5 text-primary' />
                 </div>
               </CardHeader>
@@ -215,7 +250,9 @@ export default function DashboardPage() {
             <Card className='sm:col-span-2 lg:col-span-1'>
               <CardHeader className='p-4 md:p-6'>
                 <div className='flex items-center justify-between'>
-                  <CardTitle className='text-base md:text-lg'>Notificações</CardTitle>
+                  <CardTitle className='text-base md:text-lg'>
+                    Notificações
+                  </CardTitle>
                   <Bell className='w-4 h-4 md:w-5 md:h-5 text-primary' />
                 </div>
               </CardHeader>
@@ -236,7 +273,9 @@ export default function DashboardPage() {
                   <Bell className='w-4 h-4 md:w-5 md:h-5 text-primary' />
                 </div>
                 <div className='min-w-0 flex-1'>
-                  <CardTitle className='text-sm md:text-base'>Bem-vindo ao AVAlia!</CardTitle>
+                  <CardTitle className='text-sm md:text-base'>
+                    Bem-vindo ao AVAlia!
+                  </CardTitle>
                   <CardDescription className='text-xs'>
                     {new Date().toLocaleDateString('pt-BR', {
                       day: '2-digit',
@@ -249,9 +288,9 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent className='p-4 pt-0 md:p-6 md:pt-0'>
               <p className='text-xs md:text-sm text-muted-foreground'>
-                🎉 Sua conta foi criada com sucesso! Comece criando propriedades e
-                realizando avaliações de irrigação para monitorar a eficiência do seu
-                sistema.
+                🎉 Sua conta foi criada com sucesso! Comece criando propriedades
+                e realizando avaliações de irrigação para monitorar a eficiência
+                do seu sistema.
               </p>
             </CardContent>
           </Card>
@@ -259,7 +298,9 @@ export default function DashboardPage() {
           {/* Recent Activity */}
           <Card>
             <CardHeader className='p-4 md:p-6'>
-              <CardTitle className='text-base md:text-lg'>Atividade Recente</CardTitle>
+              <CardTitle className='text-base md:text-lg'>
+                Atividade Recente
+              </CardTitle>
               <CardDescription className='text-xs md:text-sm'>
                 Suas últimas ações no sistema
               </CardDescription>
@@ -291,18 +332,21 @@ export default function DashboardPage() {
                             Nova avaliação realizada
                           </p>
                           <p className='text-xs text-muted-foreground'>
-                            {avaliacao.unidade.indentificacao} • CUD:{' '}
+                            {avaliacao.unidade.identificacao} • CUD:{' '}
                             {avaliacao.cud.toFixed(1)}% • CUC:{' '}
                             {avaliacao.cuc.toFixed(1)}%
                           </p>
                           <p className='text-xs text-muted-foreground mt-1'>
-                            {new Date(avaliacao.data).toLocaleDateString('pt-BR', {
-                              day: '2-digit',
-                              month: 'short',
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })}
+                            {new Date(avaliacao.data).toLocaleDateString(
+                              'pt-BR',
+                              {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              }
+                            )}
                           </p>
                         </div>
                       </div>
