@@ -111,7 +111,7 @@ export default function PropertyDetailPage() {
       setProperty(propertyData);
 
       // Carrega áreas (unidades avaliadas) da propriedade
-      const areasResponse = await api.get(`/areas/${propertyId}`);
+    const areasResponse = await api.get(`/areas/property/${propertyId}`);
       const responseData = areasResponse.data?.data || areasResponse.data;
       setAreasData(responseData);
     } catch (error: any) {
