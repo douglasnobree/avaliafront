@@ -264,14 +264,6 @@ export default function PropertyDetailPage() {
                 {property.area_irrigada} ha
               </p>
             </div>
-            <div>
-              <p className='text-xs md:text-sm text-muted-foreground'>
-                Coordenadas
-              </p>
-              <p className='font-medium text-sm md:text-base'>
-                {property.latitude}, {property.longitude}
-              </p>
-            </div>
           </CardContent>
         </Card>
       </div>

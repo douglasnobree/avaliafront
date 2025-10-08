@@ -21,8 +21,6 @@ const propriedadeSchema = z.object({
   email: z.string().email('E-mail inválido'),
   municipio: z.string().min(2, 'Município é obrigatório'),
   estado: z.string().length(2, 'Use a sigla do estado (ex: SP)'),
-  latitude: z.string().min(1, 'Latitude é obrigatória'),
-  longitude: z.string().min(1, 'Longitude é obrigatória'),
   area_total: z.string().min(1, 'Área total é obrigatória'),
   area_irrigada: z.string().min(1, 'Área irrigada é obrigatória'),
   observacoes: z.string().optional(),
@@ -62,8 +60,6 @@ export default function EditarPropriedadePage() {
         email: data.email,
         municipio: data.municipio,
         estado: data.estado,
-        latitude: data.latitude.toString(),
-        longitude: data.longitude.toString(),
         area_total: data.area_total.toString(),
         area_irrigada: data.area_irrigada.toString(),
         observacoes: data.observacoes || '',
@@ -83,8 +79,6 @@ export default function EditarPropriedadePage() {
     try {
       const propertyData = {
         ...data,
-        latitude: parseFloat(data.latitude),
-        longitude: parseFloat(data.longitude),
         area_total: parseFloat(data.area_total),
         area_irrigada: parseFloat(data.area_irrigada),
       };
@@ -208,34 +202,6 @@ export default function EditarPropriedadePage() {
                 />
                 {errors.estado && (
                   <p className="text-sm text-red-500">{errors.estado.message}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="latitude">Latitude *</Label>
-                <Input
-                  id="latitude"
-                  type="number"
-                  step="any"
-                  placeholder="Ex: -22.7089"
-                  {...register('latitude')}
-                />
-                {errors.latitude && (
-                  <p className="text-sm text-red-500">{errors.latitude.message}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="longitude">Longitude *</Label>
-                <Input
-                  id="longitude"
-                  type="number"
-                  step="any"
-                  placeholder="Ex: -47.6484"
-                  {...register('longitude')}
-                />
-                {errors.longitude && (
-                  <p className="text-sm text-red-500">{errors.longitude.message}</p>
                 )}
               </div>
             </div>

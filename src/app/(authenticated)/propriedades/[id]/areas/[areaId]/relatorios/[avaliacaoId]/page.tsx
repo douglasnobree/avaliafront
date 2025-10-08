@@ -36,6 +36,16 @@ interface AvaliacaoDetalhada {
     eixo_x: number;
     eixo_y: number;
   }>;
+  comentarios?: Array<{
+    id: string;
+    comentario: string;
+    createdAt: string;
+    fotos: Array<{
+      id: string;
+      url: string;
+      descricao: string;
+    }>;
+  }>;
 }
 
 export default function RelatorioDetalhadoPage() {
@@ -90,6 +100,7 @@ export default function RelatorioDetalhadoPage() {
         cud: data.cud,
         cuc: data.cuc,
         pontos,
+        comentarios: data.Comentario || [],
       });
     } catch (error: any) {
       console.error('Erro ao carregar avaliação:', error);
@@ -535,6 +546,104 @@ export default function RelatorioDetalhadoPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Seção de Fotos e Comentários */}
+      <Card>
+        <CardHeader>
+          <CardTitle>📸 Fotos e Comentários</CardTitle>
+          <CardDescription>
+            Registros fotográficos e observações desta avaliação
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {!avaliacao.comentarios || avaliacao.comentarios.length === 0 ? (
+            <div className='flex flex-col items-center justify-center py-12 text-muted-foreground'>
+              <p className='text-lg font-semibold mb-2'>Nenhum comentário registrado</p>
+              <p className='text-sm'>Adicione fotos e observações durante a avaliação</p>
+            </div>
+          ) : (
+            <div className='space-y-6'>
+              {avaliacao.comentarios.map((comentario) => (
+                <div
+                  key={comentario.id}
+                  className='p-4 bg-muted rounded-lg border border-border'>
+                  {/* Cabeçalho do Comentário */}
+                  <div className='flex items-start justify-between mb-3'>
+                    <div>
+                      <p className='text-sm text-muted-foreground'>
+                        {new Date(comentario.createdAt).toLocaleDateString('pt-BR', {
+                          day: '2-digit',
+                          month: 'long',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Texto do Comentário */}
+                  <div className='mb-4'>
+                    <p className='text-base leading-relaxed whitespace-pre-wrap'>
+                      {comentario.comentario}
+                    </p>
+                  </div>
+
+                  {/* Galeria de Fotos */}
+                  {comentario.fotos && comentario.fotos.length > 0 && (
+                    <div className='space-y-2'>
+                      <h4 className='text-sm font-semibold text-muted-foreground'>
+                        Fotos anexadas ({comentario.fotos.length})
+                      </h4>
+                      <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
+                        {comentario.fotos.map((foto) => (
+                          <div
+                            key={foto.id}
+                            className='relative group overflow-hidden rounded-lg border border-border bg-secondary/50 hover:bg-secondary transition-colors'>
+                            <div className='aspect-square relative'>
+                              <img
+                                src={foto.url}
+                                alt={foto.descricao || 'Foto da avaliação'}
+                                className='w-full h-full object-cover'
+                                loading='lazy'
+                              />
+                              <div className='absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center'>
+                                <a
+                                  href={foto.url}
+                                  target='_blank'
+                                  rel='noopener noreferrer'
+                                  className='text-white text-sm font-medium px-3 py-1.5 bg-primary rounded-md hover:bg-primary/90'>
+                                  Ver imagem
+                                </a>
+                              </div>
+                            </div>
+                            {foto.descricao && (
+                              <div className='p-2 bg-background/95'>
+                                <p className='text-xs text-muted-foreground line-clamp-2'>
+                                  {foto.descricao}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteAvaliacao}
+        itemName="esta avaliação"
+        title="Excluir Avaliação"
+        description="Tem certeza que deseja excluir esta avaliação? Esta ação não pode ser desfeita e todos os dados, incluindo fotos e comentários, serão permanentemente removidos."
+      />
     </div>
   );
 }

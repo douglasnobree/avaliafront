@@ -128,7 +128,7 @@ export function PivoCentralForm({
                       <SelectValue placeholder='Selecione' />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value='MICROMICROASPERSOR'>
+                      <SelectItem value='MICROASPERSOR'>
                         Sprays/Sprinklers
                       </SelectItem>
                       <SelectItem value='GOTEJAMENTO'>LEPA/Bocais</SelectItem>

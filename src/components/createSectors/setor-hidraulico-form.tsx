@@ -58,7 +58,7 @@ export function SetorHidraulicoForm({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value='GOTEJAMENTO'>Gotejador</SelectItem>
-                      <SelectItem value='MICROMICROASPERSOR'>
+                      <SelectItem value='MICROASPERSOR'>
                         Microaspersor
                       </SelectItem>
                     </SelectContent>

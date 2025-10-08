@@ -72,8 +72,9 @@ export default function CreateAreaPage() {
           tipo_setor: 'SETOR_HIDRAULICO',
           userId: userId,
         };
-        console.log('Payload SETOR_HIDRAULICO:', payload);
-        await api.post('/hydraulic-sector', payload);
+        console.log('📤 Payload SETOR_HIDRAULICO:', JSON.stringify(payload, null, 2));
+        const response = await api.post('/hydraulic-sector', payload);
+        console.log('✅ Resposta do servidor:', response.data);
         toast.success('Área criada com sucesso!');
         router.push(`/propriedades/${propertyId}`);
       } else if (formData.tipo_setor === 'PIVO_CENTRAL') {

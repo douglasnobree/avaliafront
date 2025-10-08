@@ -28,8 +28,6 @@ const createPropertySchema = z.object({
   email: z.string().email('Email inválido'),
   municipio: z.string().min(2, 'Município é obrigatório'),
   estado: z.string().length(2, 'Use a sigla do estado (ex: SP)').toUpperCase(),
-  latitude: z.string().min(1, 'Latitude é obrigatória'),
-  longitude: z.string().min(1, 'Longitude é obrigatória'),
   area_total: z.string().min(1, 'Área total é obrigatória'),
   area_irrigada: z.string().min(1, 'Área irrigada é obrigatória'),
   observacoes: z.string().optional(),
@@ -57,11 +55,13 @@ export default function CreatePropertyPage() {
   const onSubmit = async (data: CreatePropertyFormData) => {
     if (!session?.user?.id) {
       toast.error('Usuário não autenticado');
+      console.error('❌ Usuário não autenticado');
       return;
     }
 
     if (!organization?.id) {
       toast.error('Nenhuma organização ativa');
+      console.error('❌ Nenhuma organização ativa');
       return;
     }
 
@@ -75,8 +75,6 @@ export default function CreatePropertyPage() {
         email: data.email,
         municipio: data.municipio,
         estado: data.estado.toUpperCase(),
-        latitude: parseFloat(data.latitude),
-        longitude: parseFloat(data.longitude),
         area_total: parseFloat(data.area_total),
         area_irrigada: parseFloat(data.area_irrigada),
         observacoes: data.observacoes || '',
@@ -84,19 +82,27 @@ export default function CreatePropertyPage() {
         organizationId: organization.id,
       };
 
+      console.log('📤 Enviando dados da propriedade:', propertyData);
+
       const response = await api.post('/property', propertyData);
+
+      console.log('✅ Resposta do servidor:', response.data);
 
       if (response.data) {
         toast.success('Propriedade criada com sucesso!');
         router.push('/dashboard');
       }
     } catch (error: any) {
-      console.error('Erro ao criar propriedade:', error);
-      toast.error(
-        error?.response?.data?.message ||
-          error?.message ||
-          'Erro ao criar propriedade'
-      );
+      console.error('❌ Erro completo:', error);
+      console.error('❌ Erro response:', error?.response);
+      console.error('❌ Erro data:', error?.response?.data);
+      
+      const errorMessage = error?.response?.data?.message 
+        || error?.response?.data?.error
+        || error?.message 
+        || 'Erro ao criar propriedade';
+      
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -222,40 +228,6 @@ export default function CreatePropertyPage() {
                 {errors.estado && (
                   <p className='text-sm text-red-500'>
                     {errors.estado.message}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-              <div className='space-y-2'>
-                <Label htmlFor='latitude'>Latitude *</Label>
-                <Input
-                  id='latitude'
-                  type='number'
-                  step='any'
-                  placeholder='Ex: -23.550520'
-                  {...register('latitude')}
-                />
-                {errors.latitude && (
-                  <p className='text-sm text-red-500'>
-                    {errors.latitude.message}
-                  </p>
-                )}
-              </div>
-
-              <div className='space-y-2'>
-                <Label htmlFor='longitude'>Longitude *</Label>
-                <Input
-                  id='longitude'
-                  type='number'
-                  step='any'
-                  placeholder='Ex: -46.633308'
-                  {...register('longitude')}
-                />
-                {errors.longitude && (
-                  <p className='text-sm text-red-500'>
-                    {errors.longitude.message}
                   </p>
                 )}
               </div>
