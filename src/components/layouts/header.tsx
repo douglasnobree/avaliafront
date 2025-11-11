@@ -27,7 +27,7 @@ export function Header() {
           <div className='flex items-center gap-3 md:gap-8 min-w-0 flex-1'>
             <Link href='/dashboard' className='flex items-center gap-2 md:gap-3 hover:opacity-80 transition-opacity min-w-0'>
               <Logo width={40} height={40} className="flex-shrink-0 md:w-[50px] md:h-[50px]" />
-              <h1 className='text-base sm:text-lg md:text-2xl font-bold text-green-600 truncate'>
+              <h1 className='text-base sm:text-lg md:text-2xl font-bold text-yellow-600 truncate'>
                 Avalia Irriga
               </h1>
             </Link>

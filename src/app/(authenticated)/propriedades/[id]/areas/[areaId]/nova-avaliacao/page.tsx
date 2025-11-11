@@ -274,7 +274,7 @@ export default function NovaAvaliacaoPage() {
               className={`px-3 py-1 rounded-full text-xs font-medium ${
                 tipoArea === 'setor_hidraulico'
                   ? 'bg-blue-100 text-blue-800'
-                  : 'bg-green-100 text-green-800'
+                  : 'bg-yellow-100 text-yellow-800'
               }`}>
               {tipoArea === 'setor_hidraulico'
                 ? 'Setor Hidráulico'
@@ -300,7 +300,7 @@ export default function NovaAvaliacaoPage() {
             <div className='space-y-2'>
               <Label>Identificação da Área</Label>
               <div className='p-3 bg-secondary rounded-md'>
-                <p className='text-lg font-semibold text-green-600'>
+                <p className='text-lg font-semibold text-yellow-600'>
                   {areaInfo?.identificacao || 'Carregando...'}
                 </p>
                 <p className='text-sm text-muted-foreground mt-1'>

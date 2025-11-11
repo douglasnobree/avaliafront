@@ -184,7 +184,7 @@ export default function RelatoriosPage() {
                       </div>
                       <div className='text-center'>
                         <p className='text-xs text-muted-foreground'>CUC</p>
-                        <p className='font-bold text-green-600'>
+                        <p className='font-bold text-yellow-600'>
                           {avaliacao.cuc.toFixed(1)}%
                         </p>
                       </div>

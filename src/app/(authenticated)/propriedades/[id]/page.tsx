@@ -384,8 +384,8 @@ export default function PropertyDetailPage() {
                               </p>
                             </div>
                             {setor.totalAvaliacoes > 0 ? (
-                              <div className='mt-3 p-2 bg-green-50 rounded-md border border-green-200'>
-                                <p className='text-xs text-green-700'>
+                              <div className='mt-3 p-2 bg-yellow-50 rounded-md border border-yellow-200'>
+                                <p className='text-xs text-yellow-700'>
                                   {setor.totalAvaliacoes} avaliações realizadas
                                 </p>
                               </div>

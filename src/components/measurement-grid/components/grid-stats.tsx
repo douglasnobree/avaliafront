@@ -42,8 +42,8 @@ export function GridStats({ medidosCount, totalPoints, vazoes }: GridStatsProps)
       )}
 
       {medidosCount === totalPoints && totalPoints > 0 && (
-        <div className="p-2 bg-green-50 border border-green-200 rounded text-center dark:bg-green-900/20 dark:border-green-800">
-          <p className="text-xs text-green-800 dark:text-green-200">
+        <div className="p-2 bg-yellow-50 border border-yellow-200 rounded text-center dark:bg-yellow-900/20 dark:border-yellow-800">
+          <p className="text-xs text-yellow-800 dark:text-yellow-200">
             ✅ Todos os pontos medidos!
           </p>
         </div>
