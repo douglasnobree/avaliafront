@@ -324,8 +324,8 @@ export default function DashboardPage() {
                       href={`/propriedades/${avaliacao.unidade.propriedade_id}/areas/${avaliacao.unidade.id}/relatorios/${avaliacao.id}`}
                       className='block'>
                       <div className='flex items-start gap-3 p-3 rounded-lg hover:bg-secondary/50 transition-colors cursor-pointer'>
-                        <div className='w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0'>
-                          <CheckCircle2 className='w-5 h-5 text-green-600' />
+                        <div className='w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0'>
+                          <CheckCircle2 className='w-5 h-5 text-yellow-600' />
                         </div>
                         <div className='flex-1 min-w-0'>
                           <p className='font-medium text-sm'>

@@ -117,7 +117,7 @@ export default function SignUp() {
         {/* Logo */}
         <div className='flex flex-col items-center space-y-4'>
           <Logo width={100} height={100} />
-          <h1 className='text-2xl md:text-3xl font-bold text-green-600 text-center'>
+          <h1 className='text-2xl md:text-3xl font-bold text-yellow-600 text-center'>
             Avalia Irriga
           </h1>
         </div>

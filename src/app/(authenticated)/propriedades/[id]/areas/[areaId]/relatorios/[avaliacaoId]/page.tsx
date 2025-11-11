@@ -111,8 +111,8 @@ export default function RelatorioDetalhadoPage() {
   };
 
   const getStatusColor = (value: number) => {
-    if (value >= 90) return 'bg-green-100 border-green-500 text-green-700';
-    if (value >= 80) return 'bg-yellow-100 border-yellow-500 text-yellow-700';
+    if (value >= 90) return 'bg-yellow-100 border-yellow-500 text-yellow-700';
+    if (value >= 80) return 'bg-orange-100 border-orange-500 text-orange-700';
     return 'bg-red-100 border-red-500 text-red-700';
   };
 
@@ -123,8 +123,8 @@ export default function RelatorioDetalhadoPage() {
   };
 
   const getIndicatorColor = (value: number) => {
-    if (value >= 90) return 'bg-green-500';
-    if (value >= 80) return 'bg-yellow-500';
+    if (value >= 90) return 'bg-yellow-500';
+    if (value >= 80) return 'bg-orange-500';
     return 'bg-red-500';
   };
 
@@ -278,7 +278,7 @@ export default function RelatorioDetalhadoPage() {
               <div className='flex flex-col gap-1'>
                 <div
                   className={`w-16 h-4 rounded ${
-                    avaliacao.cud >= 90 ? 'bg-green-500' : 'bg-gray-200'
+                    avaliacao.cud >= 90 ? 'bg-yellow-500' : 'bg-gray-200'
                   }`}></div>
                 <div
                   className={`w-16 h-4 rounded ${
@@ -324,7 +324,7 @@ export default function RelatorioDetalhadoPage() {
               <div className='flex flex-col gap-1'>
                 <div
                   className={`w-16 h-4 rounded ${
-                    avaliacao.cuc >= 90 ? 'bg-green-500' : 'bg-gray-200'
+                    avaliacao.cuc >= 90 ? 'bg-yellow-500' : 'bg-gray-200'
                   }`}></div>
                 <div
                   className={`w-16 h-4 rounded ${
@@ -444,17 +444,17 @@ export default function RelatorioDetalhadoPage() {
                   <p className='text-xs text-blue-600 dark:text-blue-400 mt-1'>L/h</p>
                 </div>
 
-                <div className='p-4 bg-green-50 dark:bg-green-950 rounded-lg border border-green-200 dark:border-green-800'>
+                <div className='p-4 bg-yellow-50 dark:bg-yellow-950 rounded-lg border border-yellow-200 dark:border-yellow-800'>
                   <div className='flex items-center gap-2 mb-1'>
-                    <TrendingUp className='w-4 h-4 text-green-600 dark:text-green-400' />
-                    <p className='text-sm text-green-600 dark:text-green-400 font-medium'>
+                    <TrendingUp className='w-4 h-4 text-yellow-600 dark:text-yellow-400' />
+                    <p className='text-sm text-yellow-600 dark:text-yellow-400 font-medium'>
                       Vazão Máxima
                     </p>
                   </div>
-                  <p className='text-2xl font-bold text-green-700 dark:text-green-300'>
+                  <p className='text-2xl font-bold text-yellow-700 dark:text-yellow-300'>
                     {vazaoMaxima.toFixed(2)}
                   </p>
-                  <p className='text-xs text-green-600 dark:text-green-400 mt-1'>
+                  <p className='text-xs text-yellow-600 dark:text-yellow-400 mt-1'>
                     +{((vazaoMaxima - vazaoMedia) / vazaoMedia * 100).toFixed(1)}% da média
                   </p>
                 </div>
@@ -505,8 +505,8 @@ export default function RelatorioDetalhadoPage() {
                     <li className='flex justify-between'>
                       <span className='text-muted-foreground'>Coef. Variação:</span>
                       <span className={`font-semibold ${
-                        coeficienteVariacao < 10 ? 'text-green-600' :
-                        coeficienteVariacao < 20 ? 'text-yellow-600' :
+                        coeficienteVariacao < 10 ? 'text-yellow-600' :
+                        coeficienteVariacao < 20 ? 'text-orange-600' :
                         'text-red-600'
                       }`}>
                         {coeficienteVariacao.toFixed(1)}%

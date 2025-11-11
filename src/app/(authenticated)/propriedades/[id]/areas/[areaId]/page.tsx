@@ -90,9 +90,9 @@ export default function AreaDetailPage() {
   };
 
   const getStatusColor = (value: number, type: 'cud' | 'cuc') => {
-    // CUD e CUC: >= 90% = bom (verde), 80-90% = aceitável (amarelo), < 80% = ruim (vermelho)
-    if (value >= 90) return 'text-green-600';
-    if (value >= 80) return 'text-yellow-600';
+    // CUD e CUC: >= 90% = bom (amarelo), 80-90% = aceitável (laranja), < 80% = ruim (vermelho)
+    if (value >= 90) return 'text-yellow-600';
+    if (value >= 80) return 'text-orange-600';
     return 'text-red-600';
   };
 
@@ -172,7 +172,7 @@ export default function AreaDetailPage() {
                 className={`px-3 py-1 rounded-full text-xs font-medium ${
                   tipoArea === 'setor_hidraulico'
                     ? 'bg-blue-100 text-blue-800'
-                    : 'bg-green-100 text-green-800'
+                    : 'bg-yellow-100 text-yellow-800'
                 }`}>
                 {tipoArea === 'setor_hidraulico'
                   ? 'Setor Hidráulico'

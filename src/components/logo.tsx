@@ -18,7 +18,7 @@ export function Logo({ width = 120, height = 120, className = '' }: LogoProps) {
           priority
           className="object-contain"
           style={{ 
-            filter: 'invert(48%) sepia(79%) saturate(2476%) hue-rotate(86deg) brightness(98%) contrast(119%)'
+            filter: 'invert(70%) sepia(98%) saturate(1500%) hue-rotate(0deg) brightness(95%) contrast(105%)'
           }}
         />
       </div>
