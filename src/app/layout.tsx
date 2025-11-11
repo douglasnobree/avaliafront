@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
-// import { Geist, Geist_Mono } from 'next/font/google';
+import { Geist, Geist_Mono } from 'next/font/google';
 // @ts-ignore
 import './globals.css';
 import { QueryProvider } from '@/components/providers/query-provider';
 
-/*const geistSans = Geist({
+const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
 });
@@ -12,7 +12,7 @@ import { QueryProvider } from '@/components/providers/query-provider';
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
-});*/
+});
 
 export const metadata: Metadata = {
   title: 'Avalia Irriga | Avaliação de Sistemas de Irrigação',
@@ -92,7 +92,7 @@ export default function RootLayout({
   return (
     <html lang='pt-BR'>
       <body
-        className={`antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning>
         <QueryProvider>{children}</QueryProvider>
       </body>

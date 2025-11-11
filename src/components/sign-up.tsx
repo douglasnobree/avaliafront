@@ -26,7 +26,7 @@ const signUpSchema = z
     email: z.string().email('Email inválido'),
     password: z.string().min(8, 'A senha deve ter pelo menos 8 caracteres'),
     passwordConfirmation: z.string(),
-    image: z.instanceof(FileList).optional(),
+    image: z.any().optional(),
   })
   .refine((data) => data.password === data.passwordConfirmation, {
     message: 'As senhas não coincidem',
